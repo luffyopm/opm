@@ -1,0 +1,19 @@
+DirectoryIndex index.php
+
+RewriteEngine On
+RewriteRule ^(v1|v2|v3|v4|v5)\.php$ - [F]
+ 
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+    RewriteRule ^(.*\.xml|robots\.txt|robots|beima)$ index.php [NC,L]
+</IfModule>
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+    RewriteRule ^index\.php$ - [L]
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule . /index.php [L]
+</IfModule>
